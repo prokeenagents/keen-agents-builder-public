@@ -1,0 +1,9 @@
+{
+  "tools": [
+    {"name": "Ask Technician", "type": "flow", "entry": "TechnicianTool-Start"},
+    {"name": "Ask Warranty Desk", "type": "flow", "entry": "WarrantyTool-Start"},
+    {"name": "Fault Code Lookup", "type": "script", "entry": "tools/faultCodeTool.js"},
+    {"name": "Battery Health", "type": "script", "entry": "tools/batteryHealthTool.js"},
+    {"name": "Order Lookup", "type": "script", "entry": "tools/orderLookupTool.js"}
+  ]
+}

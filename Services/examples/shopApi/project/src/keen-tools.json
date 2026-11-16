@@ -1,0 +1,7 @@
+{
+    "tools": [
+        { "name": "Shop Search", "type": "script", "entry": "tools/shopSearchTool.js" },
+        { "name": "Shop Cart", "type": "script", "entry": "tools/shopCartTool.js" },
+        { "name": "Shop Add To Cart", "type": "script", "entry": "tools/shopAddToCartTool.js" }
+    ]
+}

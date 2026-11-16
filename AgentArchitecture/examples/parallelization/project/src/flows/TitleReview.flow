@@ -1,0 +1,40 @@
+{
+"nodes": [
+{"id": "startNode_jdwCCnMcjvEc", "type": "startNode", "position": {"x": 304, "y": 80},
+ "data": {"label": "Start", "description": "A Parallel Flows branch: starts with an EMPTY dictionary", "labelNode": "Start Flow", "descriptionNode": "Flow entry point", "open": false,
+  "settings": {"value": "Start", "label": "Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_nOpY6ghVhpb2", "type": "scriptNode", "position": {"x": 304, "y": 512},
+ "data": {"label": "Ask reviewer", "description": "Files the listing for the reviewer on the review channel", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "review/askReviewer.js", "label": "Ask reviewer", "keyValuePairs": [{"key": "reviewer", "value": "title-writer"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_fT1T7o6mwf6h", "type": "agentNode", "position": {"x": 304, "y": 944},
+ "data": {"label": "", "description": "Answers the prompt filed on the review channel -> its answer lands on that channel", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "title-writer", "agentName": "Title Writer", "sessionId": "", "requestId": "",
+   "llm": {"company": "openai", "model": "gpt-5.4-nano", "modelId": 4936, "parameters": {"maxTokens": 2000, "reasoningEffort": "low"}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "You write titles for Tradepost, a fictional second-hand marketplace. The user message is a listing. Answer with one better title of at most 60 characters, nothing else."}
+   ],
+   "specialRules": [{"type": "skip-internal-database-interactions"}, {"type": "skip-internal-tooling"}]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_oeU9pgP8eRiY", "type": "scriptNode", "position": {"x": 800, "y": 1376},
+ "data": {"label": "Drop failed answer", "description": "Fallback: removes the error text the failed call stored on the channel", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "review/dropFailed.js", "label": "Drop failed answer", "keyValuePairs": [{"key": "reviewer", "value": "title-writer"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "endNode_lHInA3SXSNKY", "type": "endNode", "position": {"x": 304, "y": 1376},
+ "data": {"label": "End", "description": "", "labelNode": "End Flow", "descriptionNode": "Flow terminal", "open": false,
+  "settings": {"value": "End", "label": "End", "terminateDictionary": false}},
+ "dragHandle": ".drag-handle__custom"}
+],
+"edges": [
+{"id": "xy-edge__startNode_jdwCCnMcjvEcnext-scriptNode_nOpY6ghVhpb2in", "type": "step", "source": "startNode_jdwCCnMcjvEc", "sourceHandle": "next", "target": "scriptNode_nOpY6ghVhpb2", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_nOpY6ghVhpb2next_1-agentNode_fT1T7o6mwf6hin", "type": "step", "source": "scriptNode_nOpY6ghVhpb2", "sourceHandle": "next_1", "target": "agentNode_fT1T7o6mwf6h", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_nOpY6ghVhpb2error-endNode_lHInA3SXSNKYin", "type": "step", "source": "scriptNode_nOpY6ghVhpb2", "sourceHandle": "error", "target": "endNode_lHInA3SXSNKY", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_fT1T7o6mwf6hnext_1-endNode_lHInA3SXSNKYin", "type": "step", "source": "agentNode_fT1T7o6mwf6h", "sourceHandle": "next_1", "target": "endNode_lHInA3SXSNKY", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_fT1T7o6mwf6herror-scriptNode_oeU9pgP8eRiYin", "type": "step", "source": "agentNode_fT1T7o6mwf6h", "sourceHandle": "error", "target": "scriptNode_oeU9pgP8eRiY", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_oeU9pgP8eRiYnext_1-endNode_lHInA3SXSNKYin", "type": "step", "source": "scriptNode_oeU9pgP8eRiY", "sourceHandle": "next_1", "target": "endNode_lHInA3SXSNKY", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_oeU9pgP8eRiYerror-endNode_lHInA3SXSNKYin", "type": "step", "source": "scriptNode_oeU9pgP8eRiY", "sourceHandle": "error", "target": "endNode_lHInA3SXSNKY", "targetHandle": "in"}
+]
+}

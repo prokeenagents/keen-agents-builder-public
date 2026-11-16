@@ -1,0 +1,72 @@
+{
+"nodes": [
+{"id": "startNode_4QxRouAyONlm", "type": "startNode", "position": {"x": 304, "y": 80},
+ "data": {"label": "Start", "description": "One run per element of dictionary.tasks; the element is this run's whole dictionary", "labelNode": "Start Flow", "descriptionNode": "Flow entry point", "open": false,
+  "settings": {"value": "Start", "label": "Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "conditionNode_QRFlI2nOT0m8", "type": "conditionNode", "position": {"x": 304, "y": 512},
+ "data": {"label": "${dictionary.kind} == \"technical\"", "description": "Technical sub-task?", "labelNode": "Condition", "descriptionNode": "Set condition flow direction", "open": false,
+  "settings": {"value": "${dictionary.kind} == \"technical\""}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "conditionNode_EH5wBRoyR8qY", "type": "conditionNode", "position": {"x": 304, "y": 944},
+ "data": {"label": "${dictionary.kind} == \"warranty\"", "description": "Warranty sub-task?", "labelNode": "Condition", "descriptionNode": "Set condition flow direction", "open": false,
+  "settings": {"value": "${dictionary.kind} == \"warranty\""}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_dTfR8ccz2qe6", "type": "agentNode", "position": {"x": -192, "y": 1376},
+ "data": {"label": "", "description": "Technical sub-tasks", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "tech-specialist", "agentName": "Technical Specialist", "sessionId": "", "requestId": "",
+   "llm": {"company": "anthropic", "model": "claude-haiku-4-5-20251001", "modelId": 4939, "parameters": {"temperature": 0.2, "maxTokens": 600}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "You are the technical specialist of Brightway Bikes (fictional). Facts: the Volt battery (500 Wh) gives 60-90 km; under 40 km on a full charge means a worn battery; fault E07 = cells out of balance, E12 = display lost contact (hold power and minus for 10 seconds); charge between 0 and 35 °C. Answer only your sub-task, in at most 100 words, as notes for a colleague, not to the customer."},
+    {"id": "p1", "role": "user", "content": "Customer's message: ${dictionary.question}\nYour sub-task: ${dictionary.task}"}
+   ],
+   "specialRules": [{"type": "skip-internal-database-interactions"}, {"type": "skip-internal-tooling"}],
+   "agentResponse": true, "agentResponseProperty": "result"
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_5ZwT0qaifNR1", "type": "agentNode", "position": {"x": 800, "y": 1376},
+ "data": {"label": "", "description": "Warranty sub-tasks", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "warranty-specialist", "agentName": "Warranty Specialist", "sessionId": "", "requestId": "",
+   "llm": {"company": "openai", "model": "gpt-5.4-mini", "modelId": 4935, "parameters": {"maxTokens": 3000, "reasoningEffort": "low"}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "You are the warranty specialist of Brightway Bikes (fictional). Policy: frames 5 years, motor and battery 2 years from purchase; a battery under 60 % health within 2 years is replaced free; wear parts are not covered; a claim needs the order number; free collection inside the country. Answer only your sub-task, in at most 100 words, as notes for a colleague, not to the customer."},
+    {"id": "p1", "role": "user", "content": "Customer's message: ${dictionary.question}\nYour sub-task: ${dictionary.task}"}
+   ],
+   "specialRules": [{"type": "skip-internal-database-interactions"}, {"type": "skip-internal-tooling"}],
+   "agentResponse": true, "agentResponseProperty": "result"
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_cHub38y6Nmw8", "type": "agentNode", "position": {"x": 304, "y": 1376},
+ "data": {"label": "", "description": "Parts sub-tasks (and anything the Conditions did not take)", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "parts-specialist", "agentName": "Parts Specialist", "sessionId": "", "requestId": "",
+   "llm": {"company": "openai", "model": "gpt-5.4-nano", "modelId": 4936, "parameters": {"maxTokens": 3000, "reasoningEffort": "low"}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "You are the parts specialist of Brightway Bikes (fictional). Prices in EUR incl. VAT: Volt charger 4 A 69, Volt battery 500 Wh 549, brake pads (pair) 19, inner tube 9. Delivery 4.90, free from 100; 2-3 working days; batteries go by courier only, 12.90. Answer only your sub-task, in at most 100 words, as notes for a colleague, not to the customer."},
+    {"id": "p1", "role": "user", "content": "Customer's message: ${dictionary.question}\nYour sub-task: ${dictionary.task}"}
+   ],
+   "specialRules": [{"type": "skip-internal-database-interactions"}, {"type": "skip-internal-tooling"}],
+   "agentResponse": true, "agentResponseProperty": "result"
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "endNode_yXqiigV7cSEr", "type": "endNode", "position": {"x": 304, "y": 1808},
+ "data": {"label": "End", "description": "", "labelNode": "End Flow", "descriptionNode": "Flow terminal", "open": false,
+  "settings": {"value": "End", "label": "End", "terminateDictionary": false}},
+ "dragHandle": ".drag-handle__custom"}
+],
+"edges": [
+{"id": "xy-edge__startNode_4QxRouAyONlmnext-conditionNode_QRFlI2nOT0m8in", "type": "step", "source": "startNode_4QxRouAyONlm", "sourceHandle": "next", "target": "conditionNode_QRFlI2nOT0m8", "targetHandle": "in"},
+{"id": "xy-edge__conditionNode_QRFlI2nOT0m8true-agentNode_dTfR8ccz2qe6in", "type": "step", "source": "conditionNode_QRFlI2nOT0m8", "sourceHandle": "true", "target": "agentNode_dTfR8ccz2qe6", "targetHandle": "in"},
+{"id": "xy-edge__conditionNode_QRFlI2nOT0m8false-conditionNode_EH5wBRoyR8qYin", "type": "step", "source": "conditionNode_QRFlI2nOT0m8", "sourceHandle": "false", "target": "conditionNode_EH5wBRoyR8qY", "targetHandle": "in"},
+{"id": "xy-edge__conditionNode_EH5wBRoyR8qYtrue-agentNode_5ZwT0qaifNR1in", "type": "step", "source": "conditionNode_EH5wBRoyR8qY", "sourceHandle": "true", "target": "agentNode_5ZwT0qaifNR1", "targetHandle": "in"},
+{"id": "xy-edge__conditionNode_EH5wBRoyR8qYfalse-agentNode_cHub38y6Nmw8in", "type": "step", "source": "conditionNode_EH5wBRoyR8qY", "sourceHandle": "false", "target": "agentNode_cHub38y6Nmw8", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_dTfR8ccz2qe6next_1-endNode_yXqiigV7cSErin", "type": "step", "source": "agentNode_dTfR8ccz2qe6", "sourceHandle": "next_1", "target": "endNode_yXqiigV7cSEr", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_dTfR8ccz2qe6error-endNode_yXqiigV7cSErin", "type": "step", "source": "agentNode_dTfR8ccz2qe6", "sourceHandle": "error", "target": "endNode_yXqiigV7cSEr", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_5ZwT0qaifNR1next_1-endNode_yXqiigV7cSErin", "type": "step", "source": "agentNode_5ZwT0qaifNR1", "sourceHandle": "next_1", "target": "endNode_yXqiigV7cSEr", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_5ZwT0qaifNR1error-endNode_yXqiigV7cSErin", "type": "step", "source": "agentNode_5ZwT0qaifNR1", "sourceHandle": "error", "target": "endNode_yXqiigV7cSEr", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_cHub38y6Nmw8next_1-endNode_yXqiigV7cSErin", "type": "step", "source": "agentNode_cHub38y6Nmw8", "sourceHandle": "next_1", "target": "endNode_yXqiigV7cSEr", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_cHub38y6Nmw8error-endNode_yXqiigV7cSErin", "type": "step", "source": "agentNode_cHub38y6Nmw8", "sourceHandle": "error", "target": "endNode_yXqiigV7cSEr", "targetHandle": "in"}
+]
+}

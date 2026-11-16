@@ -1,0 +1,40 @@
+{
+"nodes": [
+{"id": "startNode_1OxKNpZouN21", "type": "startNode", "position": {"x": 304, "y": 80},
+ "data": {"label": "Start", "description": "A Parallel Flows branch: starts with an EMPTY dictionary", "labelNode": "Start Flow", "descriptionNode": "Flow entry point", "open": false,
+  "settings": {"value": "Start", "label": "Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_WfMRvmKRHORs", "type": "scriptNode", "position": {"x": 304, "y": 512},
+ "data": {"label": "Ask reviewer", "description": "Files the listing for the reviewer on the review channel", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "review/askReviewer.js", "label": "Ask reviewer", "keyValuePairs": [{"key": "reviewer", "value": "policy-reviewer"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_vXBTavU3XKEd", "type": "agentNode", "position": {"x": 304, "y": 944},
+ "data": {"label": "", "description": "Answers the prompt filed on the review channel -> its answer lands on that channel", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "policy-reviewer", "agentName": "Policy Reviewer", "sessionId": "", "requestId": "",
+   "llm": {"company": "openai", "model": "gpt-5.4-mini", "modelId": 4935, "parameters": {"maxTokens": 3000, "reasoningEffort": "low"}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "You check listings for Tradepost, a fictional second-hand marketplace. The user message is a listing. Tradepost's rules (fictional): no weapons, no medicines, no live animals; no phone numbers, e-mail addresses or links in the text; the price is stated in EUR. Answer \"OK\" or one short line per broken rule."}
+   ],
+   "specialRules": [{"type": "skip-internal-database-interactions"}, {"type": "skip-internal-tooling"}]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_zcON3oFeaiGq", "type": "scriptNode", "position": {"x": 800, "y": 1376},
+ "data": {"label": "Drop failed answer", "description": "Fallback: removes the error text the failed call stored on the channel", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "review/dropFailed.js", "label": "Drop failed answer", "keyValuePairs": [{"key": "reviewer", "value": "policy-reviewer"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "endNode_rJdJbP0ZQtHv", "type": "endNode", "position": {"x": 304, "y": 1376},
+ "data": {"label": "End", "description": "", "labelNode": "End Flow", "descriptionNode": "Flow terminal", "open": false,
+  "settings": {"value": "End", "label": "End", "terminateDictionary": false}},
+ "dragHandle": ".drag-handle__custom"}
+],
+"edges": [
+{"id": "xy-edge__startNode_1OxKNpZouN21next-scriptNode_WfMRvmKRHORsin", "type": "step", "source": "startNode_1OxKNpZouN21", "sourceHandle": "next", "target": "scriptNode_WfMRvmKRHORs", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_WfMRvmKRHORsnext_1-agentNode_vXBTavU3XKEdin", "type": "step", "source": "scriptNode_WfMRvmKRHORs", "sourceHandle": "next_1", "target": "agentNode_vXBTavU3XKEd", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_WfMRvmKRHORserror-endNode_rJdJbP0ZQtHvin", "type": "step", "source": "scriptNode_WfMRvmKRHORs", "sourceHandle": "error", "target": "endNode_rJdJbP0ZQtHv", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_vXBTavU3XKEdnext_1-endNode_rJdJbP0ZQtHvin", "type": "step", "source": "agentNode_vXBTavU3XKEd", "sourceHandle": "next_1", "target": "endNode_rJdJbP0ZQtHv", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_vXBTavU3XKEderror-scriptNode_zcON3oFeaiGqin", "type": "step", "source": "agentNode_vXBTavU3XKEd", "sourceHandle": "error", "target": "scriptNode_zcON3oFeaiGq", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_zcON3oFeaiGqnext_1-endNode_rJdJbP0ZQtHvin", "type": "step", "source": "scriptNode_zcON3oFeaiGq", "sourceHandle": "next_1", "target": "endNode_rJdJbP0ZQtHv", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_zcON3oFeaiGqerror-endNode_rJdJbP0ZQtHvin", "type": "step", "source": "scriptNode_zcON3oFeaiGq", "sourceHandle": "error", "target": "endNode_rJdJbP0ZQtHv", "targetHandle": "in"}
+]
+}

@@ -1,0 +1,280 @@
+{
+  "nodes": [
+    {
+      "id": "startNode_RQEUl4HjTgeI",
+      "type": "startNode",
+      "position": { "x": 304, "y": 80 },
+      "data": {
+        "label": "Start",
+        "description": "Billing desk",
+        "labelNode": "Start Flow",
+        "descriptionNode": "Flow entry point",
+        "open": false,
+        "settings": { "value": "Start", "label": "Start" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_pvWtCwjAcFo4",
+      "type": "agentNode",
+      "position": { "x": 304, "y": 512 },
+      "data": {
+        "label": "Billing Desk",
+        "description": "Answers the person (billing)",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "help-desk-agent",
+          "agentName": "Billing Desk",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-sonnet-4-6",
+            "modelId": 4938,
+            "parameters": { "temperature": 0.4, "maxTokens": 2048 }
+          },
+          "prompts": [
+            {
+              "id": "062f73d5-dc74-4c22-a52c-1ff9ac9017dc",
+              "role": "system",
+              "content": "You are the billing desk of Northwind Cycles, a bicycle shop. Answer questions about payments, invoices, refunds and prices. Be brief and friendly. Never invent the status of an order: ask for the order number instead."
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "scriptNode_o91HP2c5iJf0",
+      "type": "scriptNode",
+      "position": { "x": 304, "y": 944 },
+      "data": {
+        "label": "Clean up",
+        "description": "Deletes the routing keys this run created",
+        "labelNode": "Script",
+        "descriptionNode": "Execute custom JS script",
+        "open": false,
+        "settings": {
+          "value": "routing/cleanUp.js",
+          "label": "Clean up",
+          "keyValuePairs": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "endNode_vACKtvIPKC8d",
+      "type": "endNode",
+      "position": { "x": 304, "y": 1376 },
+      "data": {
+        "label": "End",
+        "description": "",
+        "labelNode": "End Flow",
+        "descriptionNode": "Flow terminal",
+        "open": false,
+        "settings": { "value": "End", "label": "End", "terminateDictionary": false }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "summarizerNode_OoJRV6y0Cj0E",
+      "type": "summarizerNode",
+      "position": { "x": 800, "y": 512 },
+      "data": {
+        "label": "",
+        "description": "",
+        "labelNode": "Summarizer",
+        "descriptionNode": "Writes the chat summary for an LLM node's Summary output",
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-haiku-4-5-20251001",
+            "modelId": 4939,
+            "parameters": { "temperature": 0.2, "maxTokens": 1500 }
+          },
+          "prompts": [
+            {
+              "id": "150ce1ca-c8f5-486e-b013-da5aaea3fb1d",
+              "role": "system",
+              "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."
+            }
+          ]
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "summarizerNode_jcbkivbJETfE",
+      "type": "summarizerNode",
+      "position": { "x": 1296, "y": 512 },
+      "data": {
+        "label": "",
+        "description": "",
+        "labelNode": "Summarizer",
+        "descriptionNode": "Writes the chat summary for an LLM node's Summary output",
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "openai",
+            "model": "gpt-4o-mini",
+            "modelId": 4921,
+            "parameters": { "temperature": 0.2, "maxTokens": 1500 }
+          },
+          "prompts": [
+            {
+              "id": "6a0346ae-8d84-4862-b990-e8297d8766fa",
+              "role": "system",
+              "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."
+            }
+          ]
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_K2UASP6koaNs",
+      "type": "agentNode",
+      "position": { "x": -192, "y": 512 },
+      "data": {
+        "label": "Billing Desk",
+        "description": "Fallback (Google) of the node beside it: Answers the person (billing)",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "help-desk-agent",
+          "agentName": "Billing Desk",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "google",
+            "model": "gemini-2.5-flash",
+            "modelId": 4913,
+            "parameters": { "temperature": 0.4, "maxTokens": 2048 }
+          },
+          "prompts": [
+            {
+              "id": "1b32b8c5-c529-46aa-a998-0fd735f8850e",
+              "role": "system",
+              "content": "You are the billing desk of Northwind Cycles, a bicycle shop. Answer questions about payments, invoices, refunds and prices. Be brief and friendly. Never invent the status of an order: ask for the order number instead."
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    }
+  ],
+  "edges": [
+    {
+      "id": "xy-edge__startNode_RQEUl4HjTgeInext-agentNode_pvWtCwjAcFo4in",
+      "type": "step",
+      "source": "startNode_RQEUl4HjTgeI",
+      "sourceHandle": "next",
+      "target": "agentNode_pvWtCwjAcFo4",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_pvWtCwjAcFo4next_1-scriptNode_o91HP2c5iJf0in",
+      "type": "step",
+      "source": "agentNode_pvWtCwjAcFo4",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_o91HP2c5iJf0",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_pvWtCwjAcFo4error-agentNode_K2UASP6koaNsin",
+      "type": "step",
+      "source": "agentNode_pvWtCwjAcFo4",
+      "sourceHandle": "error",
+      "target": "agentNode_K2UASP6koaNs",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_o91HP2c5iJf0next_1-endNode_vACKtvIPKC8din",
+      "type": "step",
+      "source": "scriptNode_o91HP2c5iJf0",
+      "sourceHandle": "next_1",
+      "target": "endNode_vACKtvIPKC8d",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_o91HP2c5iJf0error-endNode_vACKtvIPKC8din",
+      "type": "step",
+      "source": "scriptNode_o91HP2c5iJf0",
+      "sourceHandle": "error",
+      "target": "endNode_vACKtvIPKC8d",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_pvWtCwjAcFo4summary-summarizerNode_OoJRV6y0Cj0Ein",
+      "type": "step",
+      "source": "agentNode_pvWtCwjAcFo4",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_OoJRV6y0Cj0E",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_OoJRV6y0Cj0Eerror-summarizerNode_jcbkivbJETfEin",
+      "type": "step",
+      "source": "summarizerNode_OoJRV6y0Cj0E",
+      "sourceHandle": "error",
+      "target": "summarizerNode_jcbkivbJETfE",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_OoJRV6y0Cj0Enext_1-scriptNode_o91HP2c5iJf0in",
+      "type": "step",
+      "source": "summarizerNode_OoJRV6y0Cj0E",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_o91HP2c5iJf0",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_jcbkivbJETfEnext_1-scriptNode_o91HP2c5iJf0in",
+      "type": "step",
+      "source": "summarizerNode_jcbkivbJETfE",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_o91HP2c5iJf0",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_K2UASP6koaNsnext_1-scriptNode_o91HP2c5iJf0in",
+      "type": "step",
+      "source": "agentNode_K2UASP6koaNs",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_o91HP2c5iJf0",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_K2UASP6koaNssummary-summarizerNode_OoJRV6y0Cj0Ein",
+      "type": "step",
+      "source": "agentNode_K2UASP6koaNs",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_OoJRV6y0Cj0E",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_K2UASP6koaNserror-scriptNode_o91HP2c5iJf0in",
+      "type": "step",
+      "source": "agentNode_K2UASP6koaNs",
+      "sourceHandle": "error",
+      "target": "scriptNode_o91HP2c5iJf0",
+      "targetHandle": "in"
+    }
+  ]
+}

@@ -1,0 +1,280 @@
+{
+  "nodes": [
+    {
+      "id": "startNode_PX2fEjRb8n6q",
+      "type": "startNode",
+      "position": { "x": 304, "y": 80 },
+      "data": {
+        "label": "Start",
+        "description": "Technical desk",
+        "labelNode": "Start Flow",
+        "descriptionNode": "Flow entry point",
+        "open": false,
+        "settings": { "value": "Start", "label": "Start" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_PwH5uj7cKX5E",
+      "type": "agentNode",
+      "position": { "x": 304, "y": 512 },
+      "data": {
+        "label": "Technical Desk",
+        "description": "Answers the person (technical)",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "help-desk-agent",
+          "agentName": "Technical Desk",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-sonnet-4-6",
+            "modelId": 4938,
+            "parameters": { "temperature": 0.4, "maxTokens": 2048 }
+          },
+          "prompts": [
+            {
+              "id": "5b95e9e5-a45a-4d61-89c5-a2cf7e30323a",
+              "role": "system",
+              "content": "You are the technical desk of Northwind Cycles, a bicycle shop. Help with the bikes, repairs, faults and the Northwind Ride app. Give short numbered steps. When a fault is a safety risk, tell the person to stop riding and book a repair."
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "scriptNode_tHZUVkYMcRhF",
+      "type": "scriptNode",
+      "position": { "x": 304, "y": 944 },
+      "data": {
+        "label": "Clean up",
+        "description": "Deletes the routing keys this run created",
+        "labelNode": "Script",
+        "descriptionNode": "Execute custom JS script",
+        "open": false,
+        "settings": {
+          "value": "routing/cleanUp.js",
+          "label": "Clean up",
+          "keyValuePairs": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "endNode_0xmDEUABvXvT",
+      "type": "endNode",
+      "position": { "x": 304, "y": 1376 },
+      "data": {
+        "label": "End",
+        "description": "",
+        "labelNode": "End Flow",
+        "descriptionNode": "Flow terminal",
+        "open": false,
+        "settings": { "value": "End", "label": "End", "terminateDictionary": false }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "summarizerNode_8077G4rIb75l",
+      "type": "summarizerNode",
+      "position": { "x": 800, "y": 512 },
+      "data": {
+        "label": "",
+        "description": "",
+        "labelNode": "Summarizer",
+        "descriptionNode": "Writes the chat summary for an LLM node's Summary output",
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-haiku-4-5-20251001",
+            "modelId": 4939,
+            "parameters": { "temperature": 0.2, "maxTokens": 1500 }
+          },
+          "prompts": [
+            {
+              "id": "a7bdfe63-74a8-459e-b996-2d9d22db504b",
+              "role": "system",
+              "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."
+            }
+          ]
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "summarizerNode_AzXQzyKiE7Cd",
+      "type": "summarizerNode",
+      "position": { "x": 1296, "y": 512 },
+      "data": {
+        "label": "",
+        "description": "",
+        "labelNode": "Summarizer",
+        "descriptionNode": "Writes the chat summary for an LLM node's Summary output",
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "openai",
+            "model": "gpt-4o-mini",
+            "modelId": 4921,
+            "parameters": { "temperature": 0.2, "maxTokens": 1500 }
+          },
+          "prompts": [
+            {
+              "id": "cf53fb12-2f24-4f27-b3db-b08ad8dd2867",
+              "role": "system",
+              "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."
+            }
+          ]
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_o9wmOnKC8ABw",
+      "type": "agentNode",
+      "position": { "x": -192, "y": 512 },
+      "data": {
+        "label": "Technical Desk",
+        "description": "Fallback (Google) of the node beside it: Answers the person (technical)",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "help-desk-agent",
+          "agentName": "Technical Desk",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "google",
+            "model": "gemini-2.5-flash",
+            "modelId": 4913,
+            "parameters": { "temperature": 0.4, "maxTokens": 2048 }
+          },
+          "prompts": [
+            {
+              "id": "c9738947-cb1b-4876-8e3e-86d4c8fe8a4e",
+              "role": "system",
+              "content": "You are the technical desk of Northwind Cycles, a bicycle shop. Help with the bikes, repairs, faults and the Northwind Ride app. Give short numbered steps. When a fault is a safety risk, tell the person to stop riding and book a repair."
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    }
+  ],
+  "edges": [
+    {
+      "id": "xy-edge__startNode_PX2fEjRb8n6qnext-agentNode_PwH5uj7cKX5Ein",
+      "type": "step",
+      "source": "startNode_PX2fEjRb8n6q",
+      "sourceHandle": "next",
+      "target": "agentNode_PwH5uj7cKX5E",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_PwH5uj7cKX5Enext_1-scriptNode_tHZUVkYMcRhFin",
+      "type": "step",
+      "source": "agentNode_PwH5uj7cKX5E",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_tHZUVkYMcRhF",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_PwH5uj7cKX5Eerror-agentNode_o9wmOnKC8ABwin",
+      "type": "step",
+      "source": "agentNode_PwH5uj7cKX5E",
+      "sourceHandle": "error",
+      "target": "agentNode_o9wmOnKC8ABw",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_tHZUVkYMcRhFnext_1-endNode_0xmDEUABvXvTin",
+      "type": "step",
+      "source": "scriptNode_tHZUVkYMcRhF",
+      "sourceHandle": "next_1",
+      "target": "endNode_0xmDEUABvXvT",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_tHZUVkYMcRhFerror-endNode_0xmDEUABvXvTin",
+      "type": "step",
+      "source": "scriptNode_tHZUVkYMcRhF",
+      "sourceHandle": "error",
+      "target": "endNode_0xmDEUABvXvT",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_PwH5uj7cKX5Esummary-summarizerNode_8077G4rIb75lin",
+      "type": "step",
+      "source": "agentNode_PwH5uj7cKX5E",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_8077G4rIb75l",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_8077G4rIb75lerror-summarizerNode_AzXQzyKiE7Cdin",
+      "type": "step",
+      "source": "summarizerNode_8077G4rIb75l",
+      "sourceHandle": "error",
+      "target": "summarizerNode_AzXQzyKiE7Cd",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_8077G4rIb75lnext_1-scriptNode_tHZUVkYMcRhFin",
+      "type": "step",
+      "source": "summarizerNode_8077G4rIb75l",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_tHZUVkYMcRhF",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_AzXQzyKiE7Cdnext_1-scriptNode_tHZUVkYMcRhFin",
+      "type": "step",
+      "source": "summarizerNode_AzXQzyKiE7Cd",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_tHZUVkYMcRhF",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_o9wmOnKC8ABwnext_1-scriptNode_tHZUVkYMcRhFin",
+      "type": "step",
+      "source": "agentNode_o9wmOnKC8ABw",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_tHZUVkYMcRhF",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_o9wmOnKC8ABwsummary-summarizerNode_8077G4rIb75lin",
+      "type": "step",
+      "source": "agentNode_o9wmOnKC8ABw",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_8077G4rIb75l",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_o9wmOnKC8ABwerror-scriptNode_tHZUVkYMcRhFin",
+      "type": "step",
+      "source": "agentNode_o9wmOnKC8ABw",
+      "sourceHandle": "error",
+      "target": "scriptNode_tHZUVkYMcRhF",
+      "targetHandle": "in"
+    }
+  ]
+}

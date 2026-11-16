@@ -1,0 +1,6 @@
+[submodule "Entanglement/SDK/package"]
+	path = Entanglement/SDK/package
+	url = git@github.com:prokeenagents/chat-sdk.git
+[submodule "Entanglement/KeenSite/package"]
+	path = Entanglement/KeenSite/package
+	url = git@github.com:prokeenagents/keen-site.git

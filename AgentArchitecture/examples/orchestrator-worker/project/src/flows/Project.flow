@@ -1,0 +1,66 @@
+{
+"nodes": [
+{"id": "startNode_nYGny0U4p9Mh", "type": "startNode", "position": {"x": 304, "y": 80},
+ "data": {"label": "Start", "description": "Way A: the console agent bike-support starts here", "labelNode": "Start Flow", "descriptionNode": "Flow entry point", "open": false,
+  "settings": {"value": "Start", "label": "Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_4WpBwlYEIn9o", "type": "agentNode", "position": {"x": 304, "y": 512},
+ "data": {"label": "", "description": "The orchestrator: calls the specialists as flow tools, one per answer, then answers", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "bike-support", "agentName": "Brightway Support", "sessionId": "", "requestId": "",
+   "llm": {"company": "anthropic", "model": "claude-sonnet-4-6", "modelId": 4938, "parameters": {"temperature": 0.3, "maxTokens": 4096}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "You are the support agent of Brightway Bikes, a fictional e-bike shop. You coordinate two specialists, then answer the customer yourself, briefly and in the customer's language.\n\nWhen you need a tool, write exactly one block, with each marker at the start of a line:\n\n<SYSTEM CALL>\n!*action\nuse tool\n!*tool\n<the tool's name>\n!*context\n<the input the tool needs>\n</SYSTEM CALL>\n\nWrite nothing else inside the block, then wait: the tool's reply arrives as the next user message. Only the first block of an answer runs. So ask one specialist, wait for the reply, then ask the next one. Ask at most 3 specialists for one customer message, then answer with what you have.\n\nSpecialists:\n1. Ask Technician\nDescription: diagnoses faults, display fault codes and battery health; has its own workshop tools.\nUsage: !*context is JSON {\"task\": \"<one clear task with every fault code, battery serial number and symptom the customer gave>\"}.\n2. Ask Warranty Desk\nDescription: decides whether a repair or a replacement is covered; looks the customer's order up.\nUsage: !*context is JSON {\"task\": \"<the question, with the order number and the technician's diagnosis when you have it>\"}.\n\nNever invent prices, dates or policies: use only what the specialists return. If a specialist says its input was invalid, fix the input and ask once more."}
+   ],
+   "specialRules": []
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "endNode_FBBbHt9fHS33", "type": "endNode", "position": {"x": 304, "y": 944},
+ "data": {"label": "End", "description": "", "labelNode": "End Flow", "descriptionNode": "Flow terminal", "open": false,
+  "settings": {"value": "End", "label": "End", "terminateDictionary": false}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "summarizerNode_Bk8MuTPAUYPs", "type": "summarizerNode", "position": {"x": 800, "y": 512},
+ "data": {"label": "", "description": "", "labelNode": "Summarizer", "descriptionNode": "Writes the chat summary for an LLM node's Summary output", "openLLM": false, "openPrompt": false,
+  "settings": {
+   "sessionId": "", "requestId": "",
+   "llm": {"company": "anthropic", "model": "claude-haiku-4-5-20251001", "modelId": 4939, "parameters": {"temperature": 0.2, "maxTokens": 1500}},
+   "prompts": [
+    {"id": "8a869c20-931b-4227-bb06-b1c408b576ee", "role": "system", "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."}
+   ]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "summarizerNode_GVBLJuVaWIof", "type": "summarizerNode", "position": {"x": 1296, "y": 512},
+ "data": {"label": "", "description": "", "labelNode": "Summarizer", "descriptionNode": "Writes the chat summary for an LLM node's Summary output", "openLLM": false, "openPrompt": false,
+  "settings": {
+   "sessionId": "", "requestId": "",
+   "llm": {"company": "openai", "model": "gpt-4o-mini", "modelId": 4921, "parameters": {"temperature": 0.2, "maxTokens": 1500}},
+   "prompts": [
+    {"id": "39aebd46-c0ae-49c9-bea4-ec9bd41ad916", "role": "system", "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."}
+   ]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_VikYl9XIhKl8", "type": "agentNode", "position": {"x": -192, "y": 512},
+ "data": {"label": "", "description": "Fallback (Google) of the node beside it: The orchestrator: calls the specialists as flow tools, one per answer, then answers", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "bike-support", "agentName": "Brightway Support", "sessionId": "", "requestId": "",
+   "llm": {"company": "google", "model": "gemini-2.5-flash", "modelId": 4913, "parameters": {"temperature": 0.3, "maxTokens": 4096}},
+   "prompts": [
+    {"id": "efb3ebda-8a68-4bcd-9c4f-dd14bb429e49", "role": "system", "content": "You are the support agent of Brightway Bikes, a fictional e-bike shop. You coordinate two specialists, then answer the customer yourself, briefly and in the customer's language.\n\nWhen you need a tool, write exactly one block, with each marker at the start of a line:\n\n<SYSTEM CALL>\n!*action\nuse tool\n!*tool\n<the tool's name>\n!*context\n<the input the tool needs>\n</SYSTEM CALL>\n\nWrite nothing else inside the block, then wait: the tool's reply arrives as the next user message. Only the first block of an answer runs. So ask one specialist, wait for the reply, then ask the next one. Ask at most 3 specialists for one customer message, then answer with what you have.\n\nSpecialists:\n1. Ask Technician\nDescription: diagnoses faults, display fault codes and battery health; has its own workshop tools.\nUsage: !*context is JSON {\"task\": \"<one clear task with every fault code, battery serial number and symptom the customer gave>\"}.\n2. Ask Warranty Desk\nDescription: decides whether a repair or a replacement is covered; looks the customer's order up.\nUsage: !*context is JSON {\"task\": \"<the question, with the order number and the technician's diagnosis when you have it>\"}.\n\nNever invent prices, dates or policies: use only what the specialists return. If a specialist says its input was invalid, fix the input and ask once more."}
+   ],
+   "specialRules": []
+  }},
+ "dragHandle": ".drag-handle__custom"}
+],
+"edges": [
+{"id": "xy-edge__startNode_nYGny0U4p9Mhnext-agentNode_4WpBwlYEIn9oin", "type": "step", "source": "startNode_nYGny0U4p9Mh", "sourceHandle": "next", "target": "agentNode_4WpBwlYEIn9o", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_4WpBwlYEIn9onext_1-endNode_FBBbHt9fHS33in", "type": "step", "source": "agentNode_4WpBwlYEIn9o", "sourceHandle": "next_1", "target": "endNode_FBBbHt9fHS33", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_4WpBwlYEIn9oerror-agentNode_VikYl9XIhKl8in", "type": "step", "source": "agentNode_4WpBwlYEIn9o", "sourceHandle": "error", "target": "agentNode_VikYl9XIhKl8", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_4WpBwlYEIn9osummary-summarizerNode_Bk8MuTPAUYPsin", "type": "step", "source": "agentNode_4WpBwlYEIn9o", "sourceHandle": "summary", "target": "summarizerNode_Bk8MuTPAUYPs", "targetHandle": "in"},
+{"id": "xy-edge__summarizerNode_Bk8MuTPAUYPserror-summarizerNode_GVBLJuVaWIofin", "type": "step", "source": "summarizerNode_Bk8MuTPAUYPs", "sourceHandle": "error", "target": "summarizerNode_GVBLJuVaWIof", "targetHandle": "in"},
+{"id": "xy-edge__summarizerNode_Bk8MuTPAUYPsnext_1-endNode_FBBbHt9fHS33in", "type": "step", "source": "summarizerNode_Bk8MuTPAUYPs", "sourceHandle": "next_1", "target": "endNode_FBBbHt9fHS33", "targetHandle": "in"},
+{"id": "xy-edge__summarizerNode_GVBLJuVaWIofnext_1-endNode_FBBbHt9fHS33in", "type": "step", "source": "summarizerNode_GVBLJuVaWIof", "sourceHandle": "next_1", "target": "endNode_FBBbHt9fHS33", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_VikYl9XIhKl8next_1-endNode_FBBbHt9fHS33in", "type": "step", "source": "agentNode_VikYl9XIhKl8", "sourceHandle": "next_1", "target": "endNode_FBBbHt9fHS33", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_VikYl9XIhKl8summary-summarizerNode_Bk8MuTPAUYPsin", "type": "step", "source": "agentNode_VikYl9XIhKl8", "sourceHandle": "summary", "target": "summarizerNode_Bk8MuTPAUYPs", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_VikYl9XIhKl8error-endNode_FBBbHt9fHS33in", "type": "step", "source": "agentNode_VikYl9XIhKl8", "sourceHandle": "error", "target": "endNode_FBBbHt9fHS33", "targetHandle": "in"}
+]
+}

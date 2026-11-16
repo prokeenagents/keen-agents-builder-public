@@ -1,0 +1,58 @@
+{
+"nodes": [
+{"id": "startNode_pvWtCwjAcFo4", "type": "startNode", "position": {"x": 304, "y": 80},
+ "data": {"label": "Start", "description": "Entry of the Ask Warranty Desk flow tool", "labelNode": "Start Flow", "descriptionNode": "Flow entry point", "open": false,
+  "settings": {"value": "Start", "label": "Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_o91HP2c5iJf0", "type": "scriptNode", "position": {"x": 304, "y": 512},
+ "data": {"label": "Start worker", "description": "Checks the task, keeps it in the dictionary, gives the worker its first message", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "workers/shared/startWorker.js", "label": "Start worker", "keyValuePairs": [{"key": "key", "value": "warranty"}, {"key": "worker", "value": "warranty-advisor"}, {"key": "tool", "value": "Ask Warranty Desk"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "conditionNode_vACKtvIPKC8d", "type": "conditionNode", "position": {"x": 304, "y": 944},
+ "data": {"label": "${dictionary.warranty.ok} == true", "description": "Was the task usable?", "labelNode": "Condition", "descriptionNode": "Set condition flow direction", "open": false,
+  "settings": {"value": "${dictionary.warranty.ok} == true"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_PX2fEjRb8n6q", "type": "agentNode", "position": {"x": 304, "y": 1376},
+ "data": {"label": "", "description": "The worker: own model, own tools, Interact with DB off, memory in the dictionary", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "warranty-advisor", "agentName": "Warranty Advisor", "sessionId": "", "requestId": "",
+   "llm": {"company": "openai", "model": "gpt-5.4-mini", "modelId": 4935, "parameters": {"maxTokens": 4000, "reasoningEffort": "low"}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "You are the warranty desk of Brightway Bikes (fictional). You work for the support agent, not for the customer.\n\nThe policy: frames 5 years, motor and battery 2 years from the purchase date; a battery under 60 % health within those 2 years is replaced free; wear parts (tyres, brake pads, chain) are not covered; a claim needs the order number.\n\nYour task: ${dictionary.warranty.task}\n\nYour notes so far (what your tools found):\n${dictionary.warranty.notes}\n\nWhen you need a tool, write exactly one block, with each marker at the start of a line:\n\n<SYSTEM CALL>\n!*action\nuse tool\n!*tool\n<the tool's name>\n!*context\n<the input the tool needs>\n</SYSTEM CALL>\n\nWrite nothing else inside the block, then wait: the tool's reply arrives as the next user message. Only the first block of an answer runs.\n\nTools:\n1. Order Lookup\nDescription: what an order contains, when it was bought and how many months ago.\nUsage: !*context is JSON {\"orderNumber\": \"BW-50017\"}.\n\nUse at most 4 tool calls. Then answer in at most 80 words: covered or not, why, and what the customer must do. No greeting."}
+   ],
+   "specialRules": [{"type": "skip-internal-database-interactions"}]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_FsPwPwH5uj7c", "type": "scriptNode", "position": {"x": 304, "y": 1808},
+ "data": {"label": "Finish worker", "description": "Hands the answer to the orchestrator, deletes the working memory", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "workers/shared/finishWorker.js", "label": "Finish worker", "keyValuePairs": [{"key": "key", "value": "warranty"}, {"key": "worker", "value": "warranty-advisor"}, {"key": "tool", "value": "Ask Warranty Desk"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_KX5EtHZUVkYM", "type": "scriptNode", "position": {"x": 800, "y": 2240},
+ "data": {"label": "Worker failed", "description": "Tells the orchestrator the worker failed, deletes the working memory", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "workers/shared/failWorker.js", "label": "Worker failed", "keyValuePairs": [{"key": "key", "value": "warranty"}, {"key": "tool", "value": "Ask Warranty Desk"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_cRhF0xmDEUAB", "type": "scriptNode", "position": {"x": -192, "y": 2240},
+ "data": {"label": "Drop memory", "description": "Invalid input: the start already replied", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "workers/shared/dropKey.js", "label": "Drop memory", "keyValuePairs": [{"key": "key", "value": "warranty"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "endNode_vXvTtL7QxGr0", "type": "endNode", "position": {"x": 304, "y": 2240},
+ "data": {"label": "End", "description": "", "labelNode": "End Flow", "descriptionNode": "Flow terminal", "open": false,
+  "settings": {"value": "End", "label": "End", "terminateDictionary": false}},
+ "dragHandle": ".drag-handle__custom"}
+],
+"edges": [
+{"id": "xy-edge__startNode_pvWtCwjAcFo4next-scriptNode_o91HP2c5iJf0in", "type": "step", "source": "startNode_pvWtCwjAcFo4", "sourceHandle": "next", "target": "scriptNode_o91HP2c5iJf0", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_o91HP2c5iJf0next_1-conditionNode_vACKtvIPKC8din", "type": "step", "source": "scriptNode_o91HP2c5iJf0", "sourceHandle": "next_1", "target": "conditionNode_vACKtvIPKC8d", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_o91HP2c5iJf0error-scriptNode_KX5EtHZUVkYMin", "type": "step", "source": "scriptNode_o91HP2c5iJf0", "sourceHandle": "error", "target": "scriptNode_KX5EtHZUVkYM", "targetHandle": "in"},
+{"id": "xy-edge__conditionNode_vACKtvIPKC8dtrue-agentNode_PX2fEjRb8n6qin", "type": "step", "source": "conditionNode_vACKtvIPKC8d", "sourceHandle": "true", "target": "agentNode_PX2fEjRb8n6q", "targetHandle": "in"},
+{"id": "xy-edge__conditionNode_vACKtvIPKC8dfalse-scriptNode_cRhF0xmDEUABin", "type": "step", "source": "conditionNode_vACKtvIPKC8d", "sourceHandle": "false", "target": "scriptNode_cRhF0xmDEUAB", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_PX2fEjRb8n6qnext_1-scriptNode_FsPwPwH5uj7cin", "type": "step", "source": "agentNode_PX2fEjRb8n6q", "sourceHandle": "next_1", "target": "scriptNode_FsPwPwH5uj7c", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_PX2fEjRb8n6qerror-scriptNode_KX5EtHZUVkYMin", "type": "step", "source": "agentNode_PX2fEjRb8n6q", "sourceHandle": "error", "target": "scriptNode_KX5EtHZUVkYM", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_FsPwPwH5uj7cnext_1-endNode_vXvTtL7QxGr0in", "type": "step", "source": "scriptNode_FsPwPwH5uj7c", "sourceHandle": "next_1", "target": "endNode_vXvTtL7QxGr0", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_FsPwPwH5uj7cerror-scriptNode_KX5EtHZUVkYMin", "type": "step", "source": "scriptNode_FsPwPwH5uj7c", "sourceHandle": "error", "target": "scriptNode_KX5EtHZUVkYM", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_KX5EtHZUVkYMnext_1-endNode_vXvTtL7QxGr0in", "type": "step", "source": "scriptNode_KX5EtHZUVkYM", "sourceHandle": "next_1", "target": "endNode_vXvTtL7QxGr0", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_KX5EtHZUVkYMerror-endNode_vXvTtL7QxGr0in", "type": "step", "source": "scriptNode_KX5EtHZUVkYM", "sourceHandle": "error", "target": "endNode_vXvTtL7QxGr0", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_cRhF0xmDEUABnext_1-endNode_vXvTtL7QxGr0in", "type": "step", "source": "scriptNode_cRhF0xmDEUAB", "sourceHandle": "next_1", "target": "endNode_vXvTtL7QxGr0", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_cRhF0xmDEUABerror-endNode_vXvTtL7QxGr0in", "type": "step", "source": "scriptNode_cRhF0xmDEUAB", "sourceHandle": "error", "target": "endNode_vXvTtL7QxGr0", "targetHandle": "in"}
+]
+}

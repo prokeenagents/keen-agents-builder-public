@@ -1,0 +1,30 @@
+{
+"nodes": [
+{"id": "startNode_MndP6YtfsPCg", "type": "startNode", "position": {"x": 304, "y": 80},
+ "data": {"label": "Start", "description": "One run per element of dictionary.votes", "labelNode": "Start Flow", "descriptionNode": "Flow entry point", "open": false,
+  "settings": {"value": "Start", "label": "Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_s0trYXcqpzAa", "type": "agentNode", "position": {"x": 304, "y": 512},
+ "data": {"label": "", "description": "One vote; Interact with DB off so the voters never see each other", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "publish-voter", "agentName": "Publish Voter", "sessionId": "", "requestId": "",
+   "llm": {"company": "anthropic", "model": "claude-haiku-4-5-20251001", "modelId": 4939, "parameters": {"temperature": 0.8, "maxTokens": 20}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "Decide whether this listing can be published on Tradepost, a fictional second-hand marketplace, as it is. Tradepost's rules (fictional): no weapons, no medicines, no live animals; no phone numbers, e-mail addresses or links in the text; the price is stated in EUR. It must also give a buyer enough detail to decide. Answer with exactly one word: publish or hold."},
+    {"id": "p1", "role": "user", "content": "${dictionary.listing}"}
+   ],
+   "specialRules": [{"type": "skip-internal-database-interactions"}, {"type": "skip-internal-tooling"}],
+   "agentResponse": true, "agentResponseProperty": "vote"
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "endNode_TA9ObQSeVA20", "type": "endNode", "position": {"x": 304, "y": 944},
+ "data": {"label": "End", "description": "", "labelNode": "End Flow", "descriptionNode": "Flow terminal", "open": false,
+  "settings": {"value": "End", "label": "End", "terminateDictionary": false}},
+ "dragHandle": ".drag-handle__custom"}
+],
+"edges": [
+{"id": "xy-edge__startNode_MndP6YtfsPCgnext-agentNode_s0trYXcqpzAain", "type": "step", "source": "startNode_MndP6YtfsPCg", "sourceHandle": "next", "target": "agentNode_s0trYXcqpzAa", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_s0trYXcqpzAanext_1-endNode_TA9ObQSeVA20in", "type": "step", "source": "agentNode_s0trYXcqpzAa", "sourceHandle": "next_1", "target": "endNode_TA9ObQSeVA20", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_s0trYXcqpzAaerror-endNode_TA9ObQSeVA20in", "type": "step", "source": "agentNode_s0trYXcqpzAa", "sourceHandle": "error", "target": "endNode_TA9ObQSeVA20", "targetHandle": "in"}
+]
+}

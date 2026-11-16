@@ -1,0 +1,115 @@
+{
+"nodes": [
+{"id": "startNode_Lnajmzb7uCMA", "type": "startNode", "position": {"x": 304, "y": 80},
+ "data": {"label": "Start", "description": "The console agent listing-reviewer starts here", "labelNode": "Start Flow", "descriptionNode": "Flow entry point", "open": false,
+  "settings": {"value": "Start", "label": "Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_kqapOZ1TQ4im", "type": "scriptNode", "position": {"x": 304, "y": 512},
+ "data": {"label": "Seed", "description": "The listing -> the session (branches) and the dictionary (vote list)", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "review/seed.js", "label": "Seed", "keyValuePairs": []}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "parallelInNode_aFCOT0OTEzkj", "type": "parallelInNode", "position": {"x": 304, "y": 944},
+ "data": {"label": "Three reviews", "description": "Sectioning: three different reviewer flows at once", "labelNode": "Parallel Flows", "descriptionNode": "Execute many flows in parallel with private context", "open": false,
+  "settings": {}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "parallelFlowNode_yVsXychuwQ5O", "type": "parallelFlowNode", "position": {"x": 800, "y": 752},
+ "data": {"label": "ClarityReview-Start", "description": "", "labelNode": "Flow Pointer", "descriptionNode": "Point to the flow that must be awaited", "open": false,
+  "settings": {"value": "ClarityReview-Start", "label": "ClarityReview-Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "parallelFlowNode_xe58I1Rxymzu", "type": "parallelFlowNode", "position": {"x": 800, "y": 944},
+ "data": {"label": "PolicyReview-Start", "description": "", "labelNode": "Flow Pointer", "descriptionNode": "Point to the flow that must be awaited", "open": false,
+  "settings": {"value": "PolicyReview-Start", "label": "PolicyReview-Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "parallelFlowNode_fOkP4CMaAdRo", "type": "parallelFlowNode", "position": {"x": 800, "y": 1136},
+ "data": {"label": "TitleReview-Start", "description": "", "labelNode": "Flow Pointer", "descriptionNode": "Point to the flow that must be awaited", "open": false,
+  "settings": {"value": "TitleReview-Start", "label": "TitleReview-Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_mYuoPFhkZzu8", "type": "scriptNode", "position": {"x": 304, "y": 1376},
+ "data": {"label": "Collect reviews", "description": "Consumes the review channel -> dictionary.reviews (one text)", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "review/collectReviews.js", "label": "Collect reviews", "keyValuePairs": []}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_1bFCGfvHOyRZ", "type": "scriptNode", "position": {"x": 304, "y": 1808},
+ "data": {"label": "Make votes", "description": "Three identical elements, the listing inside each", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "review/makeVotes.js", "label": "Make votes", "keyValuePairs": []}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "parallelContextNode_cp30FwcDmaqr", "type": "parallelContextNode", "position": {"x": 304, "y": 2240},
+ "data": {"label": "", "description": "Voting: the same flow three times, each vote merged into its element", "labelNode": "Parallel Context", "descriptionNode": "Point to the single flow that must be awaited with predefined context", "open": false,
+  "settings": {"pipe": "Voter-Start", "contextCollection": "dictionary.votes", "assignTo": "votes"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_bobuxI2qId2a", "type": "scriptNode", "position": {"x": 304, "y": 2672},
+ "data": {"label": "Combine", "description": "Counts the votes, builds dictionary.report", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "review/combine.js", "label": "Combine", "keyValuePairs": []}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_zlYfI0yzrDJI", "type": "agentNode", "position": {"x": 304, "y": 3104},
+ "data": {"label": "", "description": "The answering node (console agent ID): combines everything for the seller", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "listing-reviewer", "agentName": "Listing Reviewer", "sessionId": "", "requestId": "",
+   "llm": {"company": "anthropic", "model": "claude-sonnet-4-6", "modelId": 4938, "parameters": {"temperature": 0.3, "maxTokens": 2048}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "You review listings for Tradepost, a fictional second-hand marketplace. Write the seller a short review of the listing they sent, in their language, at most 180 words: first the verdict (publish or hold) and why, then what to fix, then the suggested title. Use only the report below. If the report is empty, say the review could not run and ask the seller to send the listing again.\n\nReport:\n${dictionary.report}"}
+   ],
+   "specialRules": [{"type": "skip-internal-tooling"}]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "endNode_VvgXdav33J3D", "type": "endNode", "position": {"x": 304, "y": 3536},
+ "data": {"label": "End", "description": "", "labelNode": "End Flow", "descriptionNode": "Flow terminal", "open": false,
+  "settings": {"value": "End", "label": "End", "terminateDictionary": false}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "summarizerNode_lT2H3KPXJkRE", "type": "summarizerNode", "position": {"x": 800, "y": 3104},
+ "data": {"label": "", "description": "", "labelNode": "Summarizer", "descriptionNode": "Writes the chat summary for an LLM node's Summary output", "openLLM": false, "openPrompt": false,
+  "settings": {
+   "sessionId": "", "requestId": "",
+   "llm": {"company": "anthropic", "model": "claude-haiku-4-5-20251001", "modelId": 4939, "parameters": {"temperature": 0.2, "maxTokens": 1500}},
+   "prompts": [
+    {"id": "dca35a21-6e7f-4e8f-ae7f-db486ead8bfd", "role": "system", "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."}
+   ]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "summarizerNode_GrdZr4usn6I9", "type": "summarizerNode", "position": {"x": 1296, "y": 3104},
+ "data": {"label": "", "description": "", "labelNode": "Summarizer", "descriptionNode": "Writes the chat summary for an LLM node's Summary output", "openLLM": false, "openPrompt": false,
+  "settings": {
+   "sessionId": "", "requestId": "",
+   "llm": {"company": "openai", "model": "gpt-4o-mini", "modelId": 4921, "parameters": {"temperature": 0.2, "maxTokens": 1500}},
+   "prompts": [
+    {"id": "758c12f2-a9a2-44d9-92d4-a8de995dbee7", "role": "system", "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."}
+   ]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_fdWKQqIVMAeF", "type": "agentNode", "position": {"x": -192, "y": 3104},
+ "data": {"label": "", "description": "Fallback (Google) of the node beside it: The answering node (console agent ID): combines everything for the seller", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "listing-reviewer", "agentName": "Listing Reviewer", "sessionId": "", "requestId": "",
+   "llm": {"company": "google", "model": "gemini-2.5-flash", "modelId": 4913, "parameters": {"temperature": 0.3, "maxTokens": 2048}},
+   "prompts": [
+    {"id": "7bc98209-3db2-4bd8-9cd7-5c271f644cee", "role": "system", "content": "You review listings for Tradepost, a fictional second-hand marketplace. Write the seller a short review of the listing they sent, in their language, at most 180 words: first the verdict (publish or hold) and why, then what to fix, then the suggested title. Use only the report below. If the report is empty, say the review could not run and ask the seller to send the listing again.\n\nReport:\n${dictionary.report}"}
+   ],
+   "specialRules": [{"type": "skip-internal-tooling"}]
+  }},
+ "dragHandle": ".drag-handle__custom"}
+],
+"edges": [
+{"id": "xy-edge__startNode_Lnajmzb7uCMAnext-scriptNode_kqapOZ1TQ4imin", "type": "step", "source": "startNode_Lnajmzb7uCMA", "sourceHandle": "next", "target": "scriptNode_kqapOZ1TQ4im", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_kqapOZ1TQ4imnext_1-parallelInNode_aFCOT0OTEzkjin", "type": "step", "source": "scriptNode_kqapOZ1TQ4im", "sourceHandle": "next_1", "target": "parallelInNode_aFCOT0OTEzkj", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_kqapOZ1TQ4imerror-agentNode_zlYfI0yzrDJIin", "type": "step", "source": "scriptNode_kqapOZ1TQ4im", "sourceHandle": "error", "target": "agentNode_zlYfI0yzrDJI", "targetHandle": "in"},
+{"id": "xy-edge__parallelInNode_aFCOT0OTEzkjnext_1-scriptNode_mYuoPFhkZzu8in", "type": "step", "source": "parallelInNode_aFCOT0OTEzkj", "sourceHandle": "next_1", "target": "scriptNode_mYuoPFhkZzu8", "targetHandle": "in"},
+{"id": "xy-edge__parallelFlowNode_yVsXychuwQ5Onext-parallelInNode_aFCOT0OTEzkjwait", "type": "step", "source": "parallelFlowNode_yVsXychuwQ5O", "sourceHandle": "next", "target": "parallelInNode_aFCOT0OTEzkj", "targetHandle": "wait"},
+{"id": "xy-edge__parallelFlowNode_xe58I1Rxymzunext-parallelInNode_aFCOT0OTEzkjwait", "type": "step", "source": "parallelFlowNode_xe58I1Rxymzu", "sourceHandle": "next", "target": "parallelInNode_aFCOT0OTEzkj", "targetHandle": "wait"},
+{"id": "xy-edge__parallelFlowNode_fOkP4CMaAdRonext-parallelInNode_aFCOT0OTEzkjwait", "type": "step", "source": "parallelFlowNode_fOkP4CMaAdRo", "sourceHandle": "next", "target": "parallelInNode_aFCOT0OTEzkj", "targetHandle": "wait"},
+{"id": "xy-edge__scriptNode_mYuoPFhkZzu8next_1-scriptNode_1bFCGfvHOyRZin", "type": "step", "source": "scriptNode_mYuoPFhkZzu8", "sourceHandle": "next_1", "target": "scriptNode_1bFCGfvHOyRZ", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_mYuoPFhkZzu8error-scriptNode_1bFCGfvHOyRZin", "type": "step", "source": "scriptNode_mYuoPFhkZzu8", "sourceHandle": "error", "target": "scriptNode_1bFCGfvHOyRZ", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_1bFCGfvHOyRZnext_1-parallelContextNode_cp30FwcDmaqrin", "type": "step", "source": "scriptNode_1bFCGfvHOyRZ", "sourceHandle": "next_1", "target": "parallelContextNode_cp30FwcDmaqr", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_1bFCGfvHOyRZerror-agentNode_zlYfI0yzrDJIin", "type": "step", "source": "scriptNode_1bFCGfvHOyRZ", "sourceHandle": "error", "target": "agentNode_zlYfI0yzrDJI", "targetHandle": "in"},
+{"id": "xy-edge__parallelContextNode_cp30FwcDmaqrnext_1-scriptNode_bobuxI2qId2ain", "type": "step", "source": "parallelContextNode_cp30FwcDmaqr", "sourceHandle": "next_1", "target": "scriptNode_bobuxI2qId2a", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_bobuxI2qId2anext_1-agentNode_zlYfI0yzrDJIin", "type": "step", "source": "scriptNode_bobuxI2qId2a", "sourceHandle": "next_1", "target": "agentNode_zlYfI0yzrDJI", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_bobuxI2qId2aerror-agentNode_zlYfI0yzrDJIin", "type": "step", "source": "scriptNode_bobuxI2qId2a", "sourceHandle": "error", "target": "agentNode_zlYfI0yzrDJI", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_zlYfI0yzrDJInext_1-endNode_VvgXdav33J3Din", "type": "step", "source": "agentNode_zlYfI0yzrDJI", "sourceHandle": "next_1", "target": "endNode_VvgXdav33J3D", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_zlYfI0yzrDJIerror-agentNode_fdWKQqIVMAeFin", "type": "step", "source": "agentNode_zlYfI0yzrDJI", "sourceHandle": "error", "target": "agentNode_fdWKQqIVMAeF", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_zlYfI0yzrDJIsummary-summarizerNode_lT2H3KPXJkREin", "type": "step", "source": "agentNode_zlYfI0yzrDJI", "sourceHandle": "summary", "target": "summarizerNode_lT2H3KPXJkRE", "targetHandle": "in"},
+{"id": "xy-edge__summarizerNode_lT2H3KPXJkREerror-summarizerNode_GrdZr4usn6I9in", "type": "step", "source": "summarizerNode_lT2H3KPXJkRE", "sourceHandle": "error", "target": "summarizerNode_GrdZr4usn6I9", "targetHandle": "in"},
+{"id": "xy-edge__summarizerNode_lT2H3KPXJkREnext_1-endNode_VvgXdav33J3Din", "type": "step", "source": "summarizerNode_lT2H3KPXJkRE", "sourceHandle": "next_1", "target": "endNode_VvgXdav33J3D", "targetHandle": "in"},
+{"id": "xy-edge__summarizerNode_GrdZr4usn6I9next_1-endNode_VvgXdav33J3Din", "type": "step", "source": "summarizerNode_GrdZr4usn6I9", "sourceHandle": "next_1", "target": "endNode_VvgXdav33J3D", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_fdWKQqIVMAeFnext_1-endNode_VvgXdav33J3Din", "type": "step", "source": "agentNode_fdWKQqIVMAeF", "sourceHandle": "next_1", "target": "endNode_VvgXdav33J3D", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_fdWKQqIVMAeFsummary-summarizerNode_lT2H3KPXJkREin", "type": "step", "source": "agentNode_fdWKQqIVMAeF", "sourceHandle": "summary", "target": "summarizerNode_lT2H3KPXJkRE", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_fdWKQqIVMAeFerror-endNode_VvgXdav33J3Din", "type": "step", "source": "agentNode_fdWKQqIVMAeF", "sourceHandle": "error", "target": "endNode_VvgXdav33J3D", "targetHandle": "in"}
+]
+}

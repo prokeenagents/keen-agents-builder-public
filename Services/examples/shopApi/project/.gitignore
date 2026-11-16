@@ -1,0 +1,9 @@
+# Local secrets — the deployment token and the console password
+.vscode/keen.json
+
+# Local tooling
+node_modules/
+.env
+.env.*
+*.zip
+.DS_Store

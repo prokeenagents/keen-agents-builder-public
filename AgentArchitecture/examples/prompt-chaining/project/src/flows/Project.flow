@@ -1,0 +1,614 @@
+{
+  "nodes": [
+    {
+      "id": "startNode_D4vk3WEaaPRC",
+      "type": "startNode",
+      "position": { "x": 304, "y": 80 },
+      "data": {
+        "label": "Start",
+        "description": "A list of changes to turn into release notes",
+        "labelNode": "Start Flow",
+        "descriptionNode": "Flow entry point",
+        "open": false,
+        "settings": { "value": "Start", "label": "Start" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "scriptNode_YURfFHTHIgCU",
+      "type": "scriptNode",
+      "position": { "x": 304, "y": 512 },
+      "data": {
+        "label": "Read message",
+        "description": "Copies the person's message and clears the chain's keys",
+        "labelNode": "Script",
+        "descriptionNode": "Execute custom JS script",
+        "open": false,
+        "settings": {
+          "value": "chain/readMessage.js",
+          "label": "Read message",
+          "keyValuePairs": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_ZGp6blphRIjd",
+      "type": "agentNode",
+      "position": { "x": 304, "y": 944 },
+      "data": {
+        "label": "Change Extractor",
+        "description": "Step 1: the user-visible changes, one per line",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "change-extractor",
+          "agentName": "Change Extractor",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-haiku-4-5-20251001",
+            "modelId": 4939,
+            "parameters": { "temperature": 0, "maxTokens": 600 }
+          },
+          "prompts": [
+            {
+              "id": "a6f10fc4-539c-4cf3-a2f7-ecc80777527c",
+              "role": "system",
+              "content": "You read a team's list of changes to Larkspur Notes, a note-taking app. List every change a user would notice, one per line, each line starting with \"- \". Leave out internal work (refactoring, tests, build tooling). If there is no change a user would notice, answer exactly NONE."
+            },
+            {
+              "id": "fa3630f6-5f9e-474c-9f97-4fb3c1df8746",
+              "role": "user",
+              "content": "${dictionary.userMessage}"
+            }
+          ],
+          "specialRules": [
+            { "type": "skip-internal-database-interactions" },
+            { "type": "skip-internal-tooling" }
+          ],
+          "agentResponse": true,
+          "agentResponseProperty": "changes"
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "scriptNode_v4OosRKT54Qx",
+      "type": "scriptNode",
+      "position": { "x": 304, "y": 1376 },
+      "data": {
+        "label": "Check changes",
+        "description": "Gate: keeps only the \"- \" lines and sets changesOk",
+        "labelNode": "Script",
+        "descriptionNode": "Execute custom JS script",
+        "open": false,
+        "settings": {
+          "value": "chain/checkChanges.js",
+          "label": "Check changes",
+          "keyValuePairs": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "conditionNode_RouAyONlmQRF",
+      "type": "conditionNode",
+      "position": { "x": 304, "y": 1808 },
+      "data": {
+        "label": "${dictionary.changesOk} == true",
+        "description": "Any user-visible change?",
+        "labelNode": "Condition",
+        "descriptionNode": "Set condition flow direction",
+        "open": false,
+        "settings": { "value": "${dictionary.changesOk} == true" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_8EH5wBRoyR8q",
+      "type": "agentNode",
+      "position": { "x": 304, "y": 2240 },
+      "data": {
+        "label": "Notes Planner",
+        "description": "Step 2: groups the changes under headings",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "notes-planner",
+          "agentName": "Notes Planner",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-haiku-4-5-20251001",
+            "modelId": 4939,
+            "parameters": { "temperature": 0, "maxTokens": 600 }
+          },
+          "prompts": [
+            {
+              "id": "36f4385b-d9ab-4b80-8865-cd302cca3f78",
+              "role": "system",
+              "content": "Group these changes under at most three headings: New, Improved, Fixed. Leave out a heading that has no change. Answer with the headings and their \"- \" lines only, nothing else."
+            },
+            { "id": "30335fc8-d3dc-4be3-b52f-b11ba352cde5", "role": "user", "content": "${dictionary.changes}" }
+          ],
+          "specialRules": [
+            { "type": "skip-internal-database-interactions" },
+            { "type": "skip-internal-tooling" }
+          ],
+          "agentResponse": true,
+          "agentResponseProperty": "outline"
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_fR8ccz2qe65Z",
+      "type": "agentNode",
+      "position": { "x": 304, "y": 2672 },
+      "data": {
+        "label": "Release Notes Writer",
+        "description": "Step 3: the answer the person keeps",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "release-notes-agent",
+          "agentName": "Release Notes Writer",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-sonnet-4-6",
+            "modelId": 4938,
+            "parameters": { "temperature": 0.5, "maxTokens": 2048 }
+          },
+          "prompts": [
+            {
+              "id": "b6d7525e-f8a9-4e6f-8e07-06c4ca1bf34c",
+              "role": "system",
+              "content": "You write release notes for Larkspur Notes, a note-taking app. Turn the outline below into friendly release notes in the language of the person's message. Keep every heading. Write one short sentence per change. Add nothing that is not in the outline. If the outline is empty, use the change lines instead.\n\nOutline:\n${dictionary.outline}\n\nThe change lines it was made from:\n${dictionary.changes}"
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_aifNR1cHub38",
+      "type": "agentNode",
+      "position": { "x": 704, "y": 2240 },
+      "data": {
+        "label": "Release Notes Asker",
+        "description": "The gate failed: ask for the changes",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "release-notes-agent",
+          "agentName": "Release Notes Asker",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-sonnet-4-6",
+            "modelId": 4938,
+            "parameters": { "temperature": 0.3, "maxTokens": 300 }
+          },
+          "prompts": [
+            {
+              "id": "4292b1c7-d3e7-4bd1-b4d3-e6b75a48feae",
+              "role": "system",
+              "content": "You write release notes for Larkspur Notes, a note-taking app. The person's message holds no change a user would notice. Say so in one sentence and ask them to paste the list of changes. Do not write release notes."
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "scriptNode_y6Nmw8yXqiig",
+      "type": "scriptNode",
+      "position": { "x": 304, "y": 3104 },
+      "data": {
+        "label": "Clean up",
+        "description": "Deletes the chain's dictionary keys",
+        "labelNode": "Script",
+        "descriptionNode": "Execute custom JS script",
+        "open": false,
+        "settings": {
+          "value": "chain/cleanUp.js",
+          "label": "Clean up",
+          "keyValuePairs": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "endNode_V7cSErLnajmz",
+      "type": "endNode",
+      "position": { "x": 304, "y": 3536 },
+      "data": {
+        "label": "End",
+        "description": "",
+        "labelNode": "End Flow",
+        "descriptionNode": "Flow terminal",
+        "open": false,
+        "settings": { "value": "End", "label": "End", "terminateDictionary": false }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "summarizerNode_zZK0wFrWA9k7",
+      "type": "summarizerNode",
+      "position": { "x": 1104, "y": 2672 },
+      "data": {
+        "label": "",
+        "description": "",
+        "labelNode": "Summarizer",
+        "descriptionNode": "Writes the chat summary for an LLM node's Summary output",
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-haiku-4-5-20251001",
+            "modelId": 4939,
+            "parameters": { "temperature": 0.2, "maxTokens": 1500 }
+          },
+          "prompts": [
+            {
+              "id": "fe7ba6ca-2b4a-4c84-9389-8d83bb2a7edc",
+              "role": "system",
+              "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."
+            }
+          ]
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "summarizerNode_GF1xk30xBal5",
+      "type": "summarizerNode",
+      "position": { "x": 1600, "y": 2672 },
+      "data": {
+        "label": "",
+        "description": "",
+        "labelNode": "Summarizer",
+        "descriptionNode": "Writes the chat summary for an LLM node's Summary output",
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "openai",
+            "model": "gpt-4o-mini",
+            "modelId": 4921,
+            "parameters": { "temperature": 0.2, "maxTokens": 1500 }
+          },
+          "prompts": [
+            {
+              "id": "cb209f18-2290-4635-8dad-546a10c8293b",
+              "role": "system",
+              "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."
+            }
+          ]
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_8C8pvgJ3ftCO",
+      "type": "agentNode",
+      "position": { "x": -192, "y": 2672 },
+      "data": {
+        "label": "Release Notes Writer",
+        "description": "Fallback (Google) of the node beside it: Step 3: the answer the person keeps",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "release-notes-agent",
+          "agentName": "Release Notes Writer",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "google",
+            "model": "gemini-2.5-flash",
+            "modelId": 4913,
+            "parameters": { "temperature": 0.5, "maxTokens": 2048 }
+          },
+          "prompts": [
+            {
+              "id": "d175a0af-9188-4ad7-8d65-d8c40532d4e8",
+              "role": "system",
+              "content": "You write release notes for Larkspur Notes, a note-taking app. Turn the outline below into friendly release notes in the language of the person's message. Keep every heading. Write one short sentence per change. Add nothing that is not in the outline. If the outline is empty, use the change lines instead.\n\nOutline:\n${dictionary.outline}\n\nThe change lines it was made from:\n${dictionary.changes}"
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_M42ZEicECO1e",
+      "type": "agentNode",
+      "position": { "x": 1104, "y": 2240 },
+      "data": {
+        "label": "Release Notes Asker",
+        "description": "Fallback (Google) of the node beside it: The gate failed: ask for the changes",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "release-notes-agent",
+          "agentName": "Release Notes Asker",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "google",
+            "model": "gemini-2.5-flash",
+            "modelId": 4913,
+            "parameters": { "temperature": 0.3, "maxTokens": 300 }
+          },
+          "prompts": [
+            {
+              "id": "27c5204a-4162-40eb-827c-8ac24f699bfd",
+              "role": "system",
+              "content": "You write release notes for Larkspur Notes, a note-taking app. The person's message holds no change a user would notice. Say so in one sentence and ask them to paste the list of changes. Do not write release notes."
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    }
+  ],
+  "edges": [
+    {
+      "id": "xy-edge__startNode_D4vk3WEaaPRCnext-scriptNode_YURfFHTHIgCUin",
+      "type": "step",
+      "source": "startNode_D4vk3WEaaPRC",
+      "sourceHandle": "next",
+      "target": "scriptNode_YURfFHTHIgCU",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_YURfFHTHIgCUnext_1-agentNode_ZGp6blphRIjdin",
+      "type": "step",
+      "source": "scriptNode_YURfFHTHIgCU",
+      "sourceHandle": "next_1",
+      "target": "agentNode_ZGp6blphRIjd",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_YURfFHTHIgCUerror-agentNode_aifNR1cHub38in",
+      "type": "step",
+      "source": "scriptNode_YURfFHTHIgCU",
+      "sourceHandle": "error",
+      "target": "agentNode_aifNR1cHub38",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_ZGp6blphRIjdnext_1-scriptNode_v4OosRKT54Qxin",
+      "type": "step",
+      "source": "agentNode_ZGp6blphRIjd",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_v4OosRKT54Qx",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_ZGp6blphRIjderror-scriptNode_v4OosRKT54Qxin",
+      "type": "step",
+      "source": "agentNode_ZGp6blphRIjd",
+      "sourceHandle": "error",
+      "target": "scriptNode_v4OosRKT54Qx",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_v4OosRKT54Qxnext_1-conditionNode_RouAyONlmQRFin",
+      "type": "step",
+      "source": "scriptNode_v4OosRKT54Qx",
+      "sourceHandle": "next_1",
+      "target": "conditionNode_RouAyONlmQRF",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_v4OosRKT54Qxerror-agentNode_aifNR1cHub38in",
+      "type": "step",
+      "source": "scriptNode_v4OosRKT54Qx",
+      "sourceHandle": "error",
+      "target": "agentNode_aifNR1cHub38",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__conditionNode_RouAyONlmQRFtrue-agentNode_8EH5wBRoyR8qin",
+      "type": "step",
+      "source": "conditionNode_RouAyONlmQRF",
+      "sourceHandle": "true",
+      "target": "agentNode_8EH5wBRoyR8q",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__conditionNode_RouAyONlmQRFfalse-agentNode_aifNR1cHub38in",
+      "type": "step",
+      "source": "conditionNode_RouAyONlmQRF",
+      "sourceHandle": "false",
+      "target": "agentNode_aifNR1cHub38",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_8EH5wBRoyR8qnext_1-agentNode_fR8ccz2qe65Zin",
+      "type": "step",
+      "source": "agentNode_8EH5wBRoyR8q",
+      "sourceHandle": "next_1",
+      "target": "agentNode_fR8ccz2qe65Z",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_8EH5wBRoyR8qerror-agentNode_fR8ccz2qe65Zin",
+      "type": "step",
+      "source": "agentNode_8EH5wBRoyR8q",
+      "sourceHandle": "error",
+      "target": "agentNode_fR8ccz2qe65Z",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_fR8ccz2qe65Znext_1-scriptNode_y6Nmw8yXqiigin",
+      "type": "step",
+      "source": "agentNode_fR8ccz2qe65Z",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_y6Nmw8yXqiig",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_fR8ccz2qe65Zerror-agentNode_8C8pvgJ3ftCOin",
+      "type": "step",
+      "source": "agentNode_fR8ccz2qe65Z",
+      "sourceHandle": "error",
+      "target": "agentNode_8C8pvgJ3ftCO",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_aifNR1cHub38next_1-scriptNode_y6Nmw8yXqiigin",
+      "type": "step",
+      "source": "agentNode_aifNR1cHub38",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_y6Nmw8yXqiig",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_aifNR1cHub38error-agentNode_M42ZEicECO1ein",
+      "type": "step",
+      "source": "agentNode_aifNR1cHub38",
+      "sourceHandle": "error",
+      "target": "agentNode_M42ZEicECO1e",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_y6Nmw8yXqiignext_1-endNode_V7cSErLnajmzin",
+      "type": "step",
+      "source": "scriptNode_y6Nmw8yXqiig",
+      "sourceHandle": "next_1",
+      "target": "endNode_V7cSErLnajmz",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_y6Nmw8yXqiigerror-endNode_V7cSErLnajmzin",
+      "type": "step",
+      "source": "scriptNode_y6Nmw8yXqiig",
+      "sourceHandle": "error",
+      "target": "endNode_V7cSErLnajmz",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_fR8ccz2qe65Zsummary-summarizerNode_zZK0wFrWA9k7in",
+      "type": "step",
+      "source": "agentNode_fR8ccz2qe65Z",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_zZK0wFrWA9k7",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_aifNR1cHub38summary-summarizerNode_zZK0wFrWA9k7in",
+      "type": "step",
+      "source": "agentNode_aifNR1cHub38",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_zZK0wFrWA9k7",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_zZK0wFrWA9k7error-summarizerNode_GF1xk30xBal5in",
+      "type": "step",
+      "source": "summarizerNode_zZK0wFrWA9k7",
+      "sourceHandle": "error",
+      "target": "summarizerNode_GF1xk30xBal5",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_zZK0wFrWA9k7next_1-scriptNode_y6Nmw8yXqiigin",
+      "type": "step",
+      "source": "summarizerNode_zZK0wFrWA9k7",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_y6Nmw8yXqiig",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_GF1xk30xBal5next_1-scriptNode_y6Nmw8yXqiigin",
+      "type": "step",
+      "source": "summarizerNode_GF1xk30xBal5",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_y6Nmw8yXqiig",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_8C8pvgJ3ftCOnext_1-scriptNode_y6Nmw8yXqiigin",
+      "type": "step",
+      "source": "agentNode_8C8pvgJ3ftCO",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_y6Nmw8yXqiig",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_8C8pvgJ3ftCOsummary-summarizerNode_zZK0wFrWA9k7in",
+      "type": "step",
+      "source": "agentNode_8C8pvgJ3ftCO",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_zZK0wFrWA9k7",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_8C8pvgJ3ftCOerror-scriptNode_y6Nmw8yXqiigin",
+      "type": "step",
+      "source": "agentNode_8C8pvgJ3ftCO",
+      "sourceHandle": "error",
+      "target": "scriptNode_y6Nmw8yXqiig",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_M42ZEicECO1enext_1-scriptNode_y6Nmw8yXqiigin",
+      "type": "step",
+      "source": "agentNode_M42ZEicECO1e",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_y6Nmw8yXqiig",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_M42ZEicECO1esummary-summarizerNode_zZK0wFrWA9k7in",
+      "type": "step",
+      "source": "agentNode_M42ZEicECO1e",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_zZK0wFrWA9k7",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_M42ZEicECO1eerror-scriptNode_y6Nmw8yXqiigin",
+      "type": "step",
+      "source": "agentNode_M42ZEicECO1e",
+      "sourceHandle": "error",
+      "target": "scriptNode_y6Nmw8yXqiig",
+      "targetHandle": "in"
+    }
+  ]
+}

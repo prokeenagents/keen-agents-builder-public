@@ -1,0 +1,283 @@
+{
+  "nodes": [
+    {
+      "id": "startNode_sH0pSt4rtQ1x",
+      "type": "startNode",
+      "position": {
+        "x": 304,
+        "y": 80
+      },
+      "data": {
+        "label": "Start",
+        "description": "The shop assistant",
+        "labelNode": "Start Flow",
+        "descriptionNode": "Flow entry point",
+        "open": false,
+        "settings": {
+          "value": "Start",
+          "label": "Start"
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_sH0pAs5tR7kp",
+      "type": "agentNode",
+      "position": {
+        "x": 304,
+        "y": 512
+      },
+      "data": {
+        "label": "Shop Assistant",
+        "description": "Answers the person; calls the three shop tools",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "shop-assistant",
+          "agentName": "Shop Assistant",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-sonnet-4-6",
+            "modelId": 4938,
+            "parameters": {
+              "temperature": 0.3,
+              "maxTokens": 2048
+            }
+          },
+          "prompts": [
+            {
+              "id": "5b0c7a2e-3f4d-4e8a-9c21-6d7e8f9a0b1c",
+              "role": "system",
+              "content": "You are the shopping assistant of the shop on this site. Help the person find products, see their cart and add products to it. Answer briefly, in the person's language. For products, prices, stock and the cart use only what the tools return; never invent a SKU or a price.\n\nWhen you need a tool, write exactly one block, with each marker at the start of a line:\n\n<SYSTEM CALL>\n!*action\nuse tool\n!*tool\n<the tool's name>\n!*context\n<the input the tool needs>\n</SYSTEM CALL>\n\nWrite nothing else inside the block and only one block per answer. Then wait: the tool's reply arrives as the next user message, as JSON. If it says \"ok\": false and \"retryable\": true, correct the call once as its \"error\" says. Otherwise tell the person in plain words what failed. Never call tools more than 4 times for one question.\n\nTools:\n\n1. Shop Search\nDescription: searches the shop's catalogue and returns up to 10 products, each with sku, name, price (amount, currency) and inStock. Use it whenever the person looks for a product, asks a price or asks whether something is in stock.\nUsage: !*context is JSON {\"query\": \"<a few words>\", \"limit\": 5} (limit 1-10).\n\n2. Shop Cart\nDescription: shows the person's own cart: its lines (sku, name, quantity, price) and the total. Use it when the person asks what is in their cart, and before you change the quantity of a product that may already be in it.\nUsage: !*context is {}.\n\n3. Shop Add To Cart\nDescription: sets how many of one product are in the person's cart and returns the cart. Use it only after the person clearly asked to add or change that product, with a sku from Shop Search or Shop Cart. \"quantity\" is the TOTAL the person wants in the cart for that product: one already in the cart and they want one more means 2. Calling it again with the same input changes nothing.\nUsage: !*context is JSON {\"sku\": \"<sku>\", \"quantity\": <1-20>}.\n\nIf a reply says the shop is not available, tell the person it cannot be used right now and do not call the shop tools again in this conversation. If a reply says the person is not signed in to the shop, ask them to sign in to the shop on this site and ask again. Never ask the person for a password, a key or a token."
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "endNode_sH0pEnd9Wm3z",
+      "type": "endNode",
+      "position": {
+        "x": 304,
+        "y": 944
+      },
+      "data": {
+        "label": "End",
+        "description": "",
+        "labelNode": "End Flow",
+        "descriptionNode": "Flow terminal",
+        "open": false,
+        "settings": {
+          "value": "End",
+          "label": "End",
+          "terminateDictionary": false
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "summarizerNode_bNZpdZeg69qI",
+      "type": "summarizerNode",
+      "position": {
+        "x": 800,
+        "y": 512
+      },
+      "data": {
+        "label": "",
+        "description": "",
+        "labelNode": "Summarizer",
+        "descriptionNode": "Writes the chat summary for an LLM node's Summary output",
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-haiku-4-5-20251001",
+            "modelId": 4939,
+            "parameters": {
+              "temperature": 0.2,
+              "maxTokens": 1500
+            }
+          },
+          "prompts": [
+            {
+              "id": "2e54815d-0a67-419a-ac1e-2c566ceba14f",
+              "role": "system",
+              "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."
+            }
+          ]
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "summarizerNode_OQzyi9Ffuncd",
+      "type": "summarizerNode",
+      "position": {
+        "x": 1296,
+        "y": 512
+      },
+      "data": {
+        "label": "",
+        "description": "",
+        "labelNode": "Summarizer",
+        "descriptionNode": "Writes the chat summary for an LLM node's Summary output",
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "openai",
+            "model": "gpt-4o-mini",
+            "modelId": 4921,
+            "parameters": {
+              "temperature": 0.2,
+              "maxTokens": 1500
+            }
+          },
+          "prompts": [
+            {
+              "id": "6ccc4361-6708-4687-b862-4acaf05935a1",
+              "role": "system",
+              "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."
+            }
+          ]
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_cD0jl5ktdy81",
+      "type": "agentNode",
+      "position": {
+        "x": -192,
+        "y": 512
+      },
+      "data": {
+        "label": "Shop Assistant",
+        "description": "Fallback (Google) of the node beside it: Answers the person; calls the three shop tools",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "shop-assistant",
+          "agentName": "Shop Assistant",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "google",
+            "model": "gemini-2.5-flash",
+            "modelId": 4913,
+            "parameters": {
+              "temperature": 0.3,
+              "maxTokens": 2048
+            }
+          },
+          "prompts": [
+            {
+              "id": "0f546162-908e-41aa-bb9f-fc9d267aa2f1",
+              "role": "system",
+              "content": "You are the shopping assistant of the shop on this site. Help the person find products, see their cart and add products to it. Answer briefly, in the person's language. For products, prices, stock and the cart use only what the tools return; never invent a SKU or a price.\n\nWhen you need a tool, write exactly one block, with each marker at the start of a line:\n\n<SYSTEM CALL>\n!*action\nuse tool\n!*tool\n<the tool's name>\n!*context\n<the input the tool needs>\n</SYSTEM CALL>\n\nWrite nothing else inside the block and only one block per answer. Then wait: the tool's reply arrives as the next user message, as JSON. If it says \"ok\": false and \"retryable\": true, correct the call once as its \"error\" says. Otherwise tell the person in plain words what failed. Never call tools more than 4 times for one question.\n\nTools:\n\n1. Shop Search\nDescription: searches the shop's catalogue and returns up to 10 products, each with sku, name, price (amount, currency) and inStock. Use it whenever the person looks for a product, asks a price or asks whether something is in stock.\nUsage: !*context is JSON {\"query\": \"<a few words>\", \"limit\": 5} (limit 1-10).\n\n2. Shop Cart\nDescription: shows the person's own cart: its lines (sku, name, quantity, price) and the total. Use it when the person asks what is in their cart, and before you change the quantity of a product that may already be in it.\nUsage: !*context is {}.\n\n3. Shop Add To Cart\nDescription: sets how many of one product are in the person's cart and returns the cart. Use it only after the person clearly asked to add or change that product, with a sku from Shop Search or Shop Cart. \"quantity\" is the TOTAL the person wants in the cart for that product: one already in the cart and they want one more means 2. Calling it again with the same input changes nothing.\nUsage: !*context is JSON {\"sku\": \"<sku>\", \"quantity\": <1-20>}.\n\nIf a reply says the shop is not available, tell the person it cannot be used right now and do not call the shop tools again in this conversation. If a reply says the person is not signed in to the shop, ask them to sign in to the shop on this site and ask again. Never ask the person for a password, a key or a token."
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    }
+  ],
+  "edges": [
+    {
+      "id": "xy-edge__startNode_sH0pSt4rtQ1xnext-agentNode_sH0pAs5tR7kpin",
+      "type": "step",
+      "source": "startNode_sH0pSt4rtQ1x",
+      "sourceHandle": "next",
+      "target": "agentNode_sH0pAs5tR7kp",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_sH0pAs5tR7kpnext_1-endNode_sH0pEnd9Wm3zin",
+      "type": "step",
+      "source": "agentNode_sH0pAs5tR7kp",
+      "sourceHandle": "next_1",
+      "target": "endNode_sH0pEnd9Wm3z",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_sH0pAs5tR7kperror-agentNode_cD0jl5ktdy81in",
+      "type": "step",
+      "source": "agentNode_sH0pAs5tR7kp",
+      "sourceHandle": "error",
+      "target": "agentNode_cD0jl5ktdy81",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_sH0pAs5tR7kpsummary-summarizerNode_bNZpdZeg69qIin",
+      "type": "step",
+      "source": "agentNode_sH0pAs5tR7kp",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_bNZpdZeg69qI",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_bNZpdZeg69qIerror-summarizerNode_OQzyi9Ffuncdin",
+      "type": "step",
+      "source": "summarizerNode_bNZpdZeg69qI",
+      "sourceHandle": "error",
+      "target": "summarizerNode_OQzyi9Ffuncd",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_bNZpdZeg69qInext_1-endNode_sH0pEnd9Wm3zin",
+      "type": "step",
+      "source": "summarizerNode_bNZpdZeg69qI",
+      "sourceHandle": "next_1",
+      "target": "endNode_sH0pEnd9Wm3z",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_OQzyi9Ffuncdnext_1-endNode_sH0pEnd9Wm3zin",
+      "type": "step",
+      "source": "summarizerNode_OQzyi9Ffuncd",
+      "sourceHandle": "next_1",
+      "target": "endNode_sH0pEnd9Wm3z",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_cD0jl5ktdy81next_1-endNode_sH0pEnd9Wm3zin",
+      "type": "step",
+      "source": "agentNode_cD0jl5ktdy81",
+      "sourceHandle": "next_1",
+      "target": "endNode_sH0pEnd9Wm3z",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_cD0jl5ktdy81summary-summarizerNode_bNZpdZeg69qIin",
+      "type": "step",
+      "source": "agentNode_cD0jl5ktdy81",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_bNZpdZeg69qI",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_cD0jl5ktdy81error-endNode_sH0pEnd9Wm3zin",
+      "type": "step",
+      "source": "agentNode_cD0jl5ktdy81",
+      "sourceHandle": "error",
+      "target": "endNode_sH0pEnd9Wm3z",
+      "targetHandle": "in"
+    }
+  ]
+}

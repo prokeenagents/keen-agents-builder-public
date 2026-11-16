@@ -1,0 +1,515 @@
+{
+  "nodes": [
+    {
+      "id": "startNode_b7uCMAkqapOZ",
+      "type": "startNode",
+      "position": { "x": 304, "y": 80 },
+      "data": {
+        "label": "Start",
+        "description": "Product facts to turn into a blurb",
+        "labelNode": "Start Flow",
+        "descriptionNode": "Flow entry point",
+        "open": false,
+        "settings": { "value": "Start", "label": "Start" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "scriptNode_1TQ4imaFCOT0",
+      "type": "scriptNode",
+      "position": { "x": 304, "y": 512 },
+      "data": {
+        "label": "Prepare rounds",
+        "description": "Reads the message, resets the counter and the drafts",
+        "labelNode": "Script",
+        "descriptionNode": "Execute custom JS script",
+        "open": false,
+        "settings": {
+          "value": "review/prepareRound.js",
+          "label": "Prepare rounds",
+          "keyValuePairs": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "joinNode_OTEzkjyVsXyc",
+      "type": "joinNode",
+      "position": { "x": 304, "y": 944 },
+      "data": { "label": "", "labelNode": "Join Flow", "descriptionNode": "Common merge point" },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_58I1RxymzufO",
+      "type": "agentNode",
+      "position": { "x": 304, "y": 1376 },
+      "data": {
+        "label": "Blurb Writer",
+        "description": "Generator: writes or rewrites the blurb",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "blurb-writer",
+          "agentName": "Blurb Writer",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-sonnet-4-6",
+            "modelId": 4938,
+            "parameters": { "temperature": 0.7, "maxTokens": 400 }
+          },
+          "prompts": [
+            {
+              "id": "abc15b4c-5908-49d1-909c-049b1d82cffc",
+              "role": "system",
+              "content": "You write product blurbs for Fernhill Outdoor, an outdoor gear shop. Write one blurb of at most 60 words from the product facts. Use only those facts. No superlatives such as best or ultimate. When there is reviewer feedback, rewrite your previous draft to fix it. Answer with the blurb only."
+            },
+            {
+              "id": "12dbed84-5c77-4392-a0f3-9e52e52073a6",
+              "role": "user",
+              "content": "Product facts:\n${dictionary.userMessage}\n\nYour previous draft:\n${dictionary.draft}\n\nReviewer feedback to fix:\n${dictionary.feedback}"
+            }
+          ],
+          "specialRules": [
+            { "type": "skip-internal-database-interactions" },
+            { "type": "skip-internal-tooling" }
+          ],
+          "agentResponse": true,
+          "agentResponseProperty": "draft"
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_RomYuoPFhkZz",
+      "type": "agentNode",
+      "position": { "x": 304, "y": 1808 },
+      "data": {
+        "label": "Blurb Judge",
+        "description": "Evaluator: scores the draft 1-10 with one fix",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "blurb-judge",
+          "agentName": "Blurb Judge",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-haiku-4-5-20251001",
+            "modelId": 4939,
+            "parameters": { "temperature": 0, "maxTokens": 200 }
+          },
+          "prompts": [
+            {
+              "id": "73907ff1-e1ad-41ba-a6a0-972d2827483b",
+              "role": "system",
+              "content": "You review a product blurb for Fernhill Outdoor. Check: at most 60 words; every claim comes from the product facts; no superlatives; it reads well. Answer with JSON only, no other text: {\"score\": <1-10>, \"feedback\": \"<one sentence: the most important fix>\"}"
+            },
+            {
+              "id": "0f127ec0-6908-428f-8260-45c39bbb3182",
+              "role": "user",
+              "content": "Product facts:\n${dictionary.userMessage}\n\nBlurb:\n${dictionary.draft}"
+            }
+          ],
+          "specialRules": [
+            { "type": "skip-internal-database-interactions" },
+            { "type": "skip-internal-tooling" }
+          ],
+          "agentResponse": true,
+          "agentResponseProperty": "verdictRaw"
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "scriptNode_u81bFCGfvHOy",
+      "type": "scriptNode",
+      "position": { "x": 304, "y": 2240 },
+      "data": {
+        "label": "Score draft",
+        "description": "Parses the verdict, counts the round, keeps the best draft",
+        "labelNode": "Script",
+        "descriptionNode": "Execute custom JS script",
+        "open": false,
+        "settings": {
+          "value": "review/scoreDraft.js",
+          "label": "Score draft",
+          "keyValuePairs": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "conditionNode_RZcp30FwcDma",
+      "type": "conditionNode",
+      "position": { "x": 304, "y": 2672 },
+      "data": {
+        "label": "${dictionary.passed} == true || ${dictionary.attempts} >= 3",
+        "description": "Passed, or 3 rounds done?",
+        "labelNode": "Condition",
+        "descriptionNode": "Set condition flow direction",
+        "open": false,
+        "settings": { "value": "${dictionary.passed} == true || ${dictionary.attempts} >= 3" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_buxI2qId2azl",
+      "type": "agentNode",
+      "position": { "x": 304, "y": 3104 },
+      "data": {
+        "label": "Blurb Presenter",
+        "description": "The answer the person keeps",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "blurb-agent",
+          "agentName": "Blurb Presenter",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-haiku-4-5-20251001",
+            "modelId": 4939,
+            "parameters": { "temperature": 0.2, "maxTokens": 400 }
+          },
+          "prompts": [
+            {
+              "id": "3b03d654-0798-4e3a-84a0-cd8b43c678c4",
+              "role": "system",
+              "content": "You are the copy assistant of Fernhill Outdoor. Give the person the blurb below exactly as written, with one short line before it. Do not change the blurb. If the blurb is empty, say that you could not write one this time and ask the person to send the product facts again.\n\nBlurb:\n${dictionary.bestDraft}"
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "scriptNode_YfI0yzrDJIVv",
+      "type": "scriptNode",
+      "position": { "x": 304, "y": 3536 },
+      "data": {
+        "label": "Clean up",
+        "description": "Deletes the loop's dictionary keys",
+        "labelNode": "Script",
+        "descriptionNode": "Execute custom JS script",
+        "open": false,
+        "settings": {
+          "value": "review/cleanUp.js",
+          "label": "Clean up",
+          "keyValuePairs": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "endNode_gXdav33J3D04",
+      "type": "endNode",
+      "position": { "x": 304, "y": 3968 },
+      "data": {
+        "label": "End",
+        "description": "",
+        "labelNode": "End Flow",
+        "descriptionNode": "Flow terminal",
+        "open": false,
+        "settings": { "value": "End", "label": "End", "terminateDictionary": false }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "summarizerNode_XfHsYcYmyq8F",
+      "type": "summarizerNode",
+      "position": { "x": 800, "y": 3104 },
+      "data": {
+        "label": "",
+        "description": "",
+        "labelNode": "Summarizer",
+        "descriptionNode": "Writes the chat summary for an LLM node's Summary output",
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-haiku-4-5-20251001",
+            "modelId": 4939,
+            "parameters": { "temperature": 0.2, "maxTokens": 1500 }
+          },
+          "prompts": [
+            {
+              "id": "81eda349-f219-41ed-b377-534701bd8568",
+              "role": "system",
+              "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."
+            }
+          ]
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "summarizerNode_QI6m62Q4qQbG",
+      "type": "summarizerNode",
+      "position": { "x": 1296, "y": 3104 },
+      "data": {
+        "label": "",
+        "description": "",
+        "labelNode": "Summarizer",
+        "descriptionNode": "Writes the chat summary for an LLM node's Summary output",
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "openai",
+            "model": "gpt-4o-mini",
+            "modelId": 4921,
+            "parameters": { "temperature": 0.2, "maxTokens": 1500 }
+          },
+          "prompts": [
+            {
+              "id": "eb1f210a-1d2d-4d78-9052-0c00bf36bda3",
+              "role": "system",
+              "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."
+            }
+          ]
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_lTGoxvMwaNqT",
+      "type": "agentNode",
+      "position": { "x": -192, "y": 3104 },
+      "data": {
+        "label": "Blurb Presenter",
+        "description": "Fallback (Google) of the node beside it: The answer the person keeps",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "blurb-agent",
+          "agentName": "Blurb Presenter",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "google",
+            "model": "gemini-2.5-flash",
+            "modelId": 4913,
+            "parameters": { "temperature": 0.2, "maxTokens": 400 }
+          },
+          "prompts": [
+            {
+              "id": "448291d4-388a-4816-8526-5203114c2476",
+              "role": "system",
+              "content": "You are the copy assistant of Fernhill Outdoor. Give the person the blurb below exactly as written, with one short line before it. Do not change the blurb. If the blurb is empty, say that you could not write one this time and ask the person to send the product facts again.\n\nBlurb:\n${dictionary.bestDraft}"
+            }
+          ],
+          "specialRules": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    }
+  ],
+  "edges": [
+    {
+      "id": "xy-edge__startNode_b7uCMAkqapOZnext-scriptNode_1TQ4imaFCOT0in",
+      "type": "step",
+      "source": "startNode_b7uCMAkqapOZ",
+      "sourceHandle": "next",
+      "target": "scriptNode_1TQ4imaFCOT0",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_1TQ4imaFCOT0next_1-joinNode_OTEzkjyVsXycin",
+      "type": "step",
+      "source": "scriptNode_1TQ4imaFCOT0",
+      "sourceHandle": "next_1",
+      "target": "joinNode_OTEzkjyVsXyc",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_1TQ4imaFCOT0error-agentNode_buxI2qId2azlin",
+      "type": "step",
+      "source": "scriptNode_1TQ4imaFCOT0",
+      "sourceHandle": "error",
+      "target": "agentNode_buxI2qId2azl",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__joinNode_OTEzkjyVsXycnext_1-agentNode_58I1RxymzufOin",
+      "type": "step",
+      "source": "joinNode_OTEzkjyVsXyc",
+      "sourceHandle": "next_1",
+      "target": "agentNode_58I1RxymzufO",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_58I1RxymzufOnext_1-agentNode_RomYuoPFhkZzin",
+      "type": "step",
+      "source": "agentNode_58I1RxymzufO",
+      "sourceHandle": "next_1",
+      "target": "agentNode_RomYuoPFhkZz",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_58I1RxymzufOerror-agentNode_buxI2qId2azlin",
+      "type": "step",
+      "source": "agentNode_58I1RxymzufO",
+      "sourceHandle": "error",
+      "target": "agentNode_buxI2qId2azl",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_RomYuoPFhkZznext_1-scriptNode_u81bFCGfvHOyin",
+      "type": "step",
+      "source": "agentNode_RomYuoPFhkZz",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_u81bFCGfvHOy",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_RomYuoPFhkZzerror-scriptNode_u81bFCGfvHOyin",
+      "type": "step",
+      "source": "agentNode_RomYuoPFhkZz",
+      "sourceHandle": "error",
+      "target": "scriptNode_u81bFCGfvHOy",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_u81bFCGfvHOynext_1-conditionNode_RZcp30FwcDmain",
+      "type": "step",
+      "source": "scriptNode_u81bFCGfvHOy",
+      "sourceHandle": "next_1",
+      "target": "conditionNode_RZcp30FwcDma",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_u81bFCGfvHOyerror-agentNode_buxI2qId2azlin",
+      "type": "step",
+      "source": "scriptNode_u81bFCGfvHOy",
+      "sourceHandle": "error",
+      "target": "agentNode_buxI2qId2azl",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__conditionNode_RZcp30FwcDmatrue-agentNode_buxI2qId2azlin",
+      "type": "step",
+      "source": "conditionNode_RZcp30FwcDma",
+      "sourceHandle": "true",
+      "target": "agentNode_buxI2qId2azl",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__conditionNode_RZcp30FwcDmafalse-joinNode_OTEzkjyVsXycin",
+      "type": "step",
+      "source": "conditionNode_RZcp30FwcDma",
+      "sourceHandle": "false",
+      "target": "joinNode_OTEzkjyVsXyc",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_buxI2qId2azlnext_1-scriptNode_YfI0yzrDJIVvin",
+      "type": "step",
+      "source": "agentNode_buxI2qId2azl",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_YfI0yzrDJIVv",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_buxI2qId2azlerror-agentNode_lTGoxvMwaNqTin",
+      "type": "step",
+      "source": "agentNode_buxI2qId2azl",
+      "sourceHandle": "error",
+      "target": "agentNode_lTGoxvMwaNqT",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_YfI0yzrDJIVvnext_1-endNode_gXdav33J3D04in",
+      "type": "step",
+      "source": "scriptNode_YfI0yzrDJIVv",
+      "sourceHandle": "next_1",
+      "target": "endNode_gXdav33J3D04",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_YfI0yzrDJIVverror-endNode_gXdav33J3D04in",
+      "type": "step",
+      "source": "scriptNode_YfI0yzrDJIVv",
+      "sourceHandle": "error",
+      "target": "endNode_gXdav33J3D04",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_buxI2qId2azlsummary-summarizerNode_XfHsYcYmyq8Fin",
+      "type": "step",
+      "source": "agentNode_buxI2qId2azl",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_XfHsYcYmyq8F",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_XfHsYcYmyq8Ferror-summarizerNode_QI6m62Q4qQbGin",
+      "type": "step",
+      "source": "summarizerNode_XfHsYcYmyq8F",
+      "sourceHandle": "error",
+      "target": "summarizerNode_QI6m62Q4qQbG",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_XfHsYcYmyq8Fnext_1-scriptNode_YfI0yzrDJIVvin",
+      "type": "step",
+      "source": "summarizerNode_XfHsYcYmyq8F",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_YfI0yzrDJIVv",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__summarizerNode_QI6m62Q4qQbGnext_1-scriptNode_YfI0yzrDJIVvin",
+      "type": "step",
+      "source": "summarizerNode_QI6m62Q4qQbG",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_YfI0yzrDJIVv",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_lTGoxvMwaNqTnext_1-scriptNode_YfI0yzrDJIVvin",
+      "type": "step",
+      "source": "agentNode_lTGoxvMwaNqT",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_YfI0yzrDJIVv",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_lTGoxvMwaNqTsummary-summarizerNode_XfHsYcYmyq8Fin",
+      "type": "step",
+      "source": "agentNode_lTGoxvMwaNqT",
+      "sourceHandle": "summary",
+      "target": "summarizerNode_XfHsYcYmyq8F",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_lTGoxvMwaNqTerror-scriptNode_YfI0yzrDJIVvin",
+      "type": "step",
+      "source": "agentNode_lTGoxvMwaNqT",
+      "sourceHandle": "error",
+      "target": "scriptNode_YfI0yzrDJIVv",
+      "targetHandle": "in"
+    }
+  ]
+}

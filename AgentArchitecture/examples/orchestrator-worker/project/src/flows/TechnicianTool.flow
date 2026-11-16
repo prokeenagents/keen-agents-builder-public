@@ -1,0 +1,58 @@
+{
+"nodes": [
+{"id": "startNode_pQhvU168IbgN", "type": "startNode", "position": {"x": 304, "y": 80},
+ "data": {"label": "Start", "description": "Entry of the Ask Technician flow tool", "labelNode": "Start Flow", "descriptionNode": "Flow entry point", "open": false,
+  "settings": {"value": "Start", "label": "Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_u92mAysddAV4", "type": "scriptNode", "position": {"x": 304, "y": 512},
+ "data": {"label": "Start worker", "description": "Checks the task, keeps it in the dictionary, gives the worker its first message", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "workers/shared/startWorker.js", "label": "Start worker", "keyValuePairs": [{"key": "key", "value": "technician"}, {"key": "worker", "value": "bike-technician"}, {"key": "tool", "value": "Ask Technician"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "conditionNode_O9QrkBemQQJ2", "type": "conditionNode", "position": {"x": 304, "y": 944},
+ "data": {"label": "${dictionary.technician.ok} == true", "description": "Was the task usable?", "labelNode": "Condition", "descriptionNode": "Set condition flow direction", "open": false,
+  "settings": {"value": "${dictionary.technician.ok} == true"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_YevMAqosoT5P", "type": "agentNode", "position": {"x": 304, "y": 1376},
+ "data": {"label": "", "description": "The worker: own model, own tools, Interact with DB off, memory in the dictionary", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "bike-technician", "agentName": "Bike Technician", "sessionId": "", "requestId": "",
+   "llm": {"company": "anthropic", "model": "claude-haiku-4-5-20251001", "modelId": 4939, "parameters": {"temperature": 0.2, "maxTokens": 2048}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "You are the workshop technician of Brightway Bikes (fictional). You work for the support agent, not for the customer.\n\nYour task: ${dictionary.technician.task}\n\nYour notes so far (what your tools found):\n${dictionary.technician.notes}\n\nWhen you need a tool, write exactly one block, with each marker at the start of a line:\n\n<SYSTEM CALL>\n!*action\nuse tool\n!*tool\n<the tool's name>\n!*context\n<the input the tool needs>\n</SYSTEM CALL>\n\nWrite nothing else inside the block, then wait: the tool's reply arrives as the next user message. Only the first block of an answer runs.\n\nTools:\n1. Fault Code Lookup\nDescription: what a display fault code means and what to do about it.\nUsage: !*context is JSON {\"code\": \"E07\"}.\n2. Battery Health\nDescription: a battery's health in percent, its charge cycles and its purchase date, by serial number.\nUsage: !*context is JSON {\"serial\": \"BV-1001\"}.\n\nUse at most 4 tool calls. When your notes answer the task, or a tool says you have no calls left, answer in at most 80 words: the diagnosis and the next step. No greeting."}
+   ],
+   "specialRules": [{"type": "skip-internal-database-interactions"}]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_iO6ahJIpMEDE", "type": "scriptNode", "position": {"x": 304, "y": 1808},
+ "data": {"label": "Finish worker", "description": "Hands the answer to the orchestrator, deletes the working memory", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "workers/shared/finishWorker.js", "label": "Finish worker", "keyValuePairs": [{"key": "key", "value": "technician"}, {"key": "worker", "value": "bike-technician"}, {"key": "tool", "value": "Ask Technician"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_5PcBSSj3YrPg", "type": "scriptNode", "position": {"x": 800, "y": 2240},
+ "data": {"label": "Worker failed", "description": "Tells the orchestrator the worker failed, deletes the working memory", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "workers/shared/failWorker.js", "label": "Worker failed", "keyValuePairs": [{"key": "key", "value": "technician"}, {"key": "tool", "value": "Ask Technician"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_JeAiEip3RQEU", "type": "scriptNode", "position": {"x": -192, "y": 2240},
+ "data": {"label": "Drop memory", "description": "Invalid input: the start already replied", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "workers/shared/dropKey.js", "label": "Drop memory", "keyValuePairs": [{"key": "key", "value": "technician"}]}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "endNode_l4HjTgeIRj3b", "type": "endNode", "position": {"x": 304, "y": 2240},
+ "data": {"label": "End", "description": "", "labelNode": "End Flow", "descriptionNode": "Flow terminal", "open": false,
+  "settings": {"value": "End", "label": "End", "terminateDictionary": false}},
+ "dragHandle": ".drag-handle__custom"}
+],
+"edges": [
+{"id": "xy-edge__startNode_pQhvU168IbgNnext-scriptNode_u92mAysddAV4in", "type": "step", "source": "startNode_pQhvU168IbgN", "sourceHandle": "next", "target": "scriptNode_u92mAysddAV4", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_u92mAysddAV4next_1-conditionNode_O9QrkBemQQJ2in", "type": "step", "source": "scriptNode_u92mAysddAV4", "sourceHandle": "next_1", "target": "conditionNode_O9QrkBemQQJ2", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_u92mAysddAV4error-scriptNode_5PcBSSj3YrPgin", "type": "step", "source": "scriptNode_u92mAysddAV4", "sourceHandle": "error", "target": "scriptNode_5PcBSSj3YrPg", "targetHandle": "in"},
+{"id": "xy-edge__conditionNode_O9QrkBemQQJ2true-agentNode_YevMAqosoT5Pin", "type": "step", "source": "conditionNode_O9QrkBemQQJ2", "sourceHandle": "true", "target": "agentNode_YevMAqosoT5P", "targetHandle": "in"},
+{"id": "xy-edge__conditionNode_O9QrkBemQQJ2false-scriptNode_JeAiEip3RQEUin", "type": "step", "source": "conditionNode_O9QrkBemQQJ2", "sourceHandle": "false", "target": "scriptNode_JeAiEip3RQEU", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_YevMAqosoT5Pnext_1-scriptNode_iO6ahJIpMEDEin", "type": "step", "source": "agentNode_YevMAqosoT5P", "sourceHandle": "next_1", "target": "scriptNode_iO6ahJIpMEDE", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_YevMAqosoT5Perror-scriptNode_5PcBSSj3YrPgin", "type": "step", "source": "agentNode_YevMAqosoT5P", "sourceHandle": "error", "target": "scriptNode_5PcBSSj3YrPg", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_iO6ahJIpMEDEnext_1-endNode_l4HjTgeIRj3bin", "type": "step", "source": "scriptNode_iO6ahJIpMEDE", "sourceHandle": "next_1", "target": "endNode_l4HjTgeIRj3b", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_iO6ahJIpMEDEerror-scriptNode_5PcBSSj3YrPgin", "type": "step", "source": "scriptNode_iO6ahJIpMEDE", "sourceHandle": "error", "target": "scriptNode_5PcBSSj3YrPg", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_5PcBSSj3YrPgnext_1-endNode_l4HjTgeIRj3bin", "type": "step", "source": "scriptNode_5PcBSSj3YrPg", "sourceHandle": "next_1", "target": "endNode_l4HjTgeIRj3b", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_5PcBSSj3YrPgerror-endNode_l4HjTgeIRj3bin", "type": "step", "source": "scriptNode_5PcBSSj3YrPg", "sourceHandle": "error", "target": "endNode_l4HjTgeIRj3b", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_JeAiEip3RQEUnext_1-endNode_l4HjTgeIRj3bin", "type": "step", "source": "scriptNode_JeAiEip3RQEU", "sourceHandle": "next_1", "target": "endNode_l4HjTgeIRj3b", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_JeAiEip3RQEUerror-endNode_l4HjTgeIRj3bin", "type": "step", "source": "scriptNode_JeAiEip3RQEU", "sourceHandle": "error", "target": "endNode_l4HjTgeIRj3b", "targetHandle": "in"}
+]
+}

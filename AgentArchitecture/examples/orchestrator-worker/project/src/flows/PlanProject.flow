@@ -1,0 +1,104 @@
+{
+"nodes": [
+{"id": "startNode_GuqkPRNdvQ14", "type": "startNode", "position": {"x": 304, "y": 80},
+ "data": {"label": "Start", "description": "Way B: point the console agent at Start Flow PlanProject to use it", "labelNode": "Start Flow", "descriptionNode": "Flow entry point", "open": false,
+  "settings": {"value": "Start", "label": "Start"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_wrIY1pgTALEC", "type": "scriptNode", "position": {"x": 304, "y": 512},
+ "data": {"label": "Seed", "description": "Copies the customer message for the planner", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "plan/seed.js", "label": "Seed", "keyValuePairs": []}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_gmXo46AKDdFQ", "type": "agentNode", "position": {"x": 304, "y": 944},
+ "data": {"label": "", "description": "The orchestrator of way B: answers a JSON plan only", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "task-orchestrator", "agentName": "Task Orchestrator", "sessionId": "", "requestId": "",
+   "llm": {"company": "anthropic", "model": "claude-sonnet-4-6", "modelId": 4938, "parameters": {"temperature": 0, "maxTokens": 1024}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "You plan the work of Brightway Bikes' support team (fictional). You do not answer the customer. Split the customer's message into sub-tasks for the specialists:\n- technical: faults, fault codes, range, charging, battery health\n- warranty: warranty, returns, repairs under guarantee\n- parts: prices, stock and delivery of parts and accessories\nAt most 4 sub-tasks, one sentence each, only for what the message asks. Answer with JSON only, no other text: {\"tasks\": [{\"kind\": \"technical\", \"task\": \"...\"}]}. If nothing needs a specialist, answer {\"tasks\": []}."},
+    {"id": "p1", "role": "user", "content": "${dictionary.userMessage}"}
+   ],
+   "specialRules": [{"type": "skip-internal-database-interactions"}, {"type": "skip-internal-tooling"}],
+   "agentResponse": true, "agentResponseProperty": "planRaw"
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_djJikE7aD4vk", "type": "scriptNode", "position": {"x": 304, "y": 1376},
+ "data": {"label": "Parse plan", "description": "JSON plan -> dictionary.tasks, one element per sub-task", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "plan/plan.js", "label": "Parse plan", "keyValuePairs": []}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "parallelContextNode_3WEaaPRCYURf", "type": "parallelContextNode", "position": {"x": 304, "y": 1808},
+ "data": {"label": "", "description": "One Worker run per sub-task, results merged into each element", "labelNode": "Parallel Context", "descriptionNode": "Point to the single flow that must be awaited with predefined context", "open": false,
+  "settings": {"pipe": "Worker-Start", "contextCollection": "dictionary.tasks", "assignTo": "tasks"}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "scriptNode_FHTHIgCUbiuP", "type": "scriptNode", "position": {"x": 304, "y": 2240},
+ "data": {"label": "Collect", "description": "Merged list -> one text for the synthesizer", "labelNode": "Script", "descriptionNode": "Execute custom JS script", "open": false,
+  "settings": {"value": "plan/collect.js", "label": "Collect", "keyValuePairs": []}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_WxxZGp6blphR", "type": "agentNode", "position": {"x": 304, "y": 2672},
+ "data": {"label": "", "description": "The synthesizer and the answering node (console agent ID)", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "bike-support", "agentName": "Brightway Support", "sessionId": "", "requestId": "",
+   "llm": {"company": "anthropic", "model": "claude-sonnet-4-6", "modelId": 4938, "parameters": {"temperature": 0.3, "maxTokens": 2048}},
+   "prompts": [
+    {"id": "p0", "role": "system", "content": "You are the support agent of Brightway Bikes, a fictional e-bike shop. Answer the customer's message in the customer's language, in at most 200 words. Build the answer from the specialists' findings below; never contradict them and never invent prices, dates or policies. Where a finding says \"(no answer)\", or there are no findings, answer what you can and say a colleague will follow up on the rest.\n\nSpecialists' findings:\n${dictionary.findings}"}
+   ],
+   "specialRules": [{"type": "skip-internal-tooling"}]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "endNode_Ijdv4OosRKT5", "type": "endNode", "position": {"x": 304, "y": 3104},
+ "data": {"label": "End", "description": "", "labelNode": "End Flow", "descriptionNode": "Flow terminal", "open": false,
+  "settings": {"value": "End", "label": "End", "terminateDictionary": false}},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "summarizerNode_yEwPZwBJyREs", "type": "summarizerNode", "position": {"x": 800, "y": 2672},
+ "data": {"label": "", "description": "", "labelNode": "Summarizer", "descriptionNode": "Writes the chat summary for an LLM node's Summary output", "openLLM": false, "openPrompt": false,
+  "settings": {
+   "sessionId": "", "requestId": "",
+   "llm": {"company": "anthropic", "model": "claude-haiku-4-5-20251001", "modelId": 4939, "parameters": {"temperature": 0.2, "maxTokens": 1500}},
+   "prompts": [
+    {"id": "ad6011ea-26d8-4be6-b1a0-b6fe9ffd3125", "role": "system", "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."}
+   ]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "summarizerNode_z8KmWHOJnPwQ", "type": "summarizerNode", "position": {"x": 1296, "y": 2672},
+ "data": {"label": "", "description": "", "labelNode": "Summarizer", "descriptionNode": "Writes the chat summary for an LLM node's Summary output", "openLLM": false, "openPrompt": false,
+  "settings": {
+   "sessionId": "", "requestId": "",
+   "llm": {"company": "openai", "model": "gpt-4o-mini", "modelId": 4921, "parameters": {"temperature": 0.2, "maxTokens": 1500}},
+   "prompts": [
+    {"id": "a2043c24-6a0e-45e1-98bf-7fd20350dc09", "role": "system", "content": "You maintain a running summary of a conversation between a user and an AI agent.\nYou receive the previous summary (or \"(none)\") and the newest part of the conversation.\nWrite the updated summary of the WHOLE conversation so far.\n\nKeep: facts the user stated, decisions made, names, numbers, dates, identifiers, the user's preferences and\nconstraints, tasks done, and open questions or promised next steps.\nDrop: greetings, small talk, repetition, and wording that adds nothing.\nWrite in the language of the conversation. Be concise: plain short sentences or bullets, no headings.\nNever invent anything that is not in the conversation. If something changed, keep the newest version.\nReturn only the summary text."}
+   ]
+  }},
+ "dragHandle": ".drag-handle__custom"},
+{"id": "agentNode_NSYbbcx5IEzs", "type": "agentNode", "position": {"x": -192, "y": 2672},
+ "data": {"label": "", "description": "Fallback (Google) of the node beside it: The synthesizer and the answering node (console agent ID)", "labelNode": "LLM", "descriptionNode": "Use LLM processor", "open": false, "openLLM": false, "openPrompt": false,
+  "settings": {
+   "agentId": "bike-support", "agentName": "Brightway Support", "sessionId": "", "requestId": "",
+   "llm": {"company": "google", "model": "gemini-2.5-flash", "modelId": 4913, "parameters": {"temperature": 0.3, "maxTokens": 2048}},
+   "prompts": [
+    {"id": "f699abf6-e136-4b8c-a80f-ebba77bd1194", "role": "system", "content": "You are the support agent of Brightway Bikes, a fictional e-bike shop. Answer the customer's message in the customer's language, in at most 200 words. Build the answer from the specialists' findings below; never contradict them and never invent prices, dates or policies. Where a finding says \"(no answer)\", or there are no findings, answer what you can and say a colleague will follow up on the rest.\n\nSpecialists' findings:\n${dictionary.findings}"}
+   ],
+   "specialRules": [{"type": "skip-internal-tooling"}]
+  }},
+ "dragHandle": ".drag-handle__custom"}
+],
+"edges": [
+{"id": "xy-edge__startNode_GuqkPRNdvQ14next-scriptNode_wrIY1pgTALECin", "type": "step", "source": "startNode_GuqkPRNdvQ14", "sourceHandle": "next", "target": "scriptNode_wrIY1pgTALEC", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_wrIY1pgTALECnext_1-agentNode_gmXo46AKDdFQin", "type": "step", "source": "scriptNode_wrIY1pgTALEC", "sourceHandle": "next_1", "target": "agentNode_gmXo46AKDdFQ", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_wrIY1pgTALECerror-agentNode_WxxZGp6blphRin", "type": "step", "source": "scriptNode_wrIY1pgTALEC", "sourceHandle": "error", "target": "agentNode_WxxZGp6blphR", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_gmXo46AKDdFQnext_1-scriptNode_djJikE7aD4vkin", "type": "step", "source": "agentNode_gmXo46AKDdFQ", "sourceHandle": "next_1", "target": "scriptNode_djJikE7aD4vk", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_gmXo46AKDdFQerror-scriptNode_djJikE7aD4vkin", "type": "step", "source": "agentNode_gmXo46AKDdFQ", "sourceHandle": "error", "target": "scriptNode_djJikE7aD4vk", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_djJikE7aD4vknext_1-parallelContextNode_3WEaaPRCYURfin", "type": "step", "source": "scriptNode_djJikE7aD4vk", "sourceHandle": "next_1", "target": "parallelContextNode_3WEaaPRCYURf", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_djJikE7aD4vkerror-agentNode_WxxZGp6blphRin", "type": "step", "source": "scriptNode_djJikE7aD4vk", "sourceHandle": "error", "target": "agentNode_WxxZGp6blphR", "targetHandle": "in"},
+{"id": "xy-edge__parallelContextNode_3WEaaPRCYURfnext_1-scriptNode_FHTHIgCUbiuPin", "type": "step", "source": "parallelContextNode_3WEaaPRCYURf", "sourceHandle": "next_1", "target": "scriptNode_FHTHIgCUbiuP", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_FHTHIgCUbiuPnext_1-agentNode_WxxZGp6blphRin", "type": "step", "source": "scriptNode_FHTHIgCUbiuP", "sourceHandle": "next_1", "target": "agentNode_WxxZGp6blphR", "targetHandle": "in"},
+{"id": "xy-edge__scriptNode_FHTHIgCUbiuPerror-agentNode_WxxZGp6blphRin", "type": "step", "source": "scriptNode_FHTHIgCUbiuP", "sourceHandle": "error", "target": "agentNode_WxxZGp6blphR", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_WxxZGp6blphRnext_1-endNode_Ijdv4OosRKT5in", "type": "step", "source": "agentNode_WxxZGp6blphR", "sourceHandle": "next_1", "target": "endNode_Ijdv4OosRKT5", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_WxxZGp6blphRerror-agentNode_NSYbbcx5IEzsin", "type": "step", "source": "agentNode_WxxZGp6blphR", "sourceHandle": "error", "target": "agentNode_NSYbbcx5IEzs", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_WxxZGp6blphRsummary-summarizerNode_yEwPZwBJyREsin", "type": "step", "source": "agentNode_WxxZGp6blphR", "sourceHandle": "summary", "target": "summarizerNode_yEwPZwBJyREs", "targetHandle": "in"},
+{"id": "xy-edge__summarizerNode_yEwPZwBJyREserror-summarizerNode_z8KmWHOJnPwQin", "type": "step", "source": "summarizerNode_yEwPZwBJyREs", "sourceHandle": "error", "target": "summarizerNode_z8KmWHOJnPwQ", "targetHandle": "in"},
+{"id": "xy-edge__summarizerNode_yEwPZwBJyREsnext_1-endNode_Ijdv4OosRKT5in", "type": "step", "source": "summarizerNode_yEwPZwBJyREs", "sourceHandle": "next_1", "target": "endNode_Ijdv4OosRKT5", "targetHandle": "in"},
+{"id": "xy-edge__summarizerNode_z8KmWHOJnPwQnext_1-endNode_Ijdv4OosRKT5in", "type": "step", "source": "summarizerNode_z8KmWHOJnPwQ", "sourceHandle": "next_1", "target": "endNode_Ijdv4OosRKT5", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_NSYbbcx5IEzsnext_1-endNode_Ijdv4OosRKT5in", "type": "step", "source": "agentNode_NSYbbcx5IEzs", "sourceHandle": "next_1", "target": "endNode_Ijdv4OosRKT5", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_NSYbbcx5IEzssummary-summarizerNode_yEwPZwBJyREsin", "type": "step", "source": "agentNode_NSYbbcx5IEzs", "sourceHandle": "summary", "target": "summarizerNode_yEwPZwBJyREs", "targetHandle": "in"},
+{"id": "xy-edge__agentNode_NSYbbcx5IEzserror-endNode_Ijdv4OosRKT5in", "type": "step", "source": "agentNode_NSYbbcx5IEzs", "sourceHandle": "error", "target": "endNode_Ijdv4OosRKT5", "targetHandle": "in"}
+]
+}

@@ -1,0 +1,259 @@
+{
+  "nodes": [
+    {
+      "id": "startNode_nYGny0U4p9Mh",
+      "type": "startNode",
+      "position": { "x": 304, "y": 80 },
+      "data": {
+        "label": "Start",
+        "description": "A new message to the help desk",
+        "labelNode": "Start Flow",
+        "descriptionNode": "Flow entry point",
+        "open": false,
+        "settings": { "value": "Start", "label": "Start" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "scriptNode_4WpBwlYEIn9o",
+      "type": "scriptNode",
+      "position": { "x": 304, "y": 512 },
+      "data": {
+        "label": "Read message",
+        "description": "Copies the person's message into dictionary.userMessage",
+        "labelNode": "Script",
+        "descriptionNode": "Execute custom JS script",
+        "open": false,
+        "settings": {
+          "value": "routing/readMessage.js",
+          "label": "Read message",
+          "keyValuePairs": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "agentNode_HS33pQhvU168",
+      "type": "agentNode",
+      "position": { "x": 304, "y": 944 },
+      "data": {
+        "label": "Route Classifier",
+        "description": "Answers one word: billing, technical or general",
+        "labelNode": "LLM",
+        "descriptionNode": "Use LLM processor",
+        "open": false,
+        "openLLM": false,
+        "openPrompt": false,
+        "settings": {
+          "agentId": "route-classifier",
+          "agentName": "Route Classifier",
+          "sessionId": "",
+          "requestId": "",
+          "llm": {
+            "company": "anthropic",
+            "model": "claude-haiku-4-5-20251001",
+            "modelId": 4939,
+            "parameters": { "temperature": 0, "maxTokens": 16 }
+          },
+          "prompts": [
+            {
+              "id": "067cfdf8-6ffb-4a5f-ae52-4fd57e60f8f3",
+              "role": "system",
+              "content": "You sort messages for the Northwind Cycles help desk. Answer with exactly one lowercase word and nothing else: billing (payments, invoices, refunds, prices), technical (the bike, the Northwind Ride app, repairs, faults) or general (anything else)."
+            },
+            {
+              "id": "17745600-f51a-4163-8df4-a9e18508de5f",
+              "role": "user",
+              "content": "${dictionary.userMessage}"
+            }
+          ],
+          "specialRules": [
+            { "type": "skip-internal-database-interactions" },
+            { "type": "skip-internal-tooling" }
+          ],
+          "agentResponse": true,
+          "agentResponseProperty": "routeRaw"
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "scriptNode_IbgNu92mAysd",
+      "type": "scriptNode",
+      "position": { "x": 304, "y": 1376 },
+      "data": {
+        "label": "Normalise route",
+        "description": "Turns the classifier's word into billing, technical or general",
+        "labelNode": "Script",
+        "descriptionNode": "Execute custom JS script",
+        "open": false,
+        "settings": {
+          "value": "routing/normaliseRoute.js",
+          "label": "Normalise route",
+          "keyValuePairs": []
+        }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "conditionNode_dAV4O9QrkBem",
+      "type": "conditionNode",
+      "position": { "x": 304, "y": 1808 },
+      "data": {
+        "label": "${dictionary.route} == \"billing\"",
+        "description": "Billing?",
+        "labelNode": "Condition",
+        "descriptionNode": "Set condition flow direction",
+        "open": false,
+        "settings": { "value": "${dictionary.route} == \"billing\"" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "conditionNode_QQJ2YevMAqos",
+      "type": "conditionNode",
+      "position": { "x": 704, "y": 2240 },
+      "data": {
+        "label": "${dictionary.route} == \"technical\"",
+        "description": "Technical?",
+        "labelNode": "Condition",
+        "descriptionNode": "Set condition flow direction",
+        "open": false,
+        "settings": { "value": "${dictionary.route} == \"technical\"" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "jumpFlowNode_oT5PiO6ahJIp",
+      "type": "jumpFlowNode",
+      "position": { "x": 304, "y": 2240 },
+      "data": {
+        "label": "",
+        "description": "Payments, invoices, refunds, prices",
+        "labelNode": "Jump Flow",
+        "descriptionNode": "Execute Flow in this context and continue",
+        "open": false,
+        "settings": { "value": "Billing-Start" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "jumpFlowNode_MEDE5PcBSSj3",
+      "type": "jumpFlowNode",
+      "position": { "x": 704, "y": 2672 },
+      "data": {
+        "label": "",
+        "description": "The bike, the app, repairs",
+        "labelNode": "Jump Flow",
+        "descriptionNode": "Execute Flow in this context and continue",
+        "open": false,
+        "settings": { "value": "Technical-Start" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    },
+    {
+      "id": "jumpFlowNode_YrPgJeAiEip3",
+      "type": "jumpFlowNode",
+      "position": { "x": 1104, "y": 2672 },
+      "data": {
+        "label": "",
+        "description": "Everything else, and the safe default",
+        "labelNode": "Jump Flow",
+        "descriptionNode": "Execute Flow in this context and continue",
+        "open": false,
+        "settings": { "value": "General-Start" }
+      },
+      "dragHandle": ".drag-handle__custom"
+    }
+  ],
+  "edges": [
+    {
+      "id": "xy-edge__startNode_nYGny0U4p9Mhnext-scriptNode_4WpBwlYEIn9oin",
+      "type": "step",
+      "source": "startNode_nYGny0U4p9Mh",
+      "sourceHandle": "next",
+      "target": "scriptNode_4WpBwlYEIn9o",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_4WpBwlYEIn9onext_1-agentNode_HS33pQhvU168in",
+      "type": "step",
+      "source": "scriptNode_4WpBwlYEIn9o",
+      "sourceHandle": "next_1",
+      "target": "agentNode_HS33pQhvU168",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_4WpBwlYEIn9oerror-jumpFlowNode_YrPgJeAiEip3in",
+      "type": "step",
+      "source": "scriptNode_4WpBwlYEIn9o",
+      "sourceHandle": "error",
+      "target": "jumpFlowNode_YrPgJeAiEip3",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_HS33pQhvU168next_1-scriptNode_IbgNu92mAysdin",
+      "type": "step",
+      "source": "agentNode_HS33pQhvU168",
+      "sourceHandle": "next_1",
+      "target": "scriptNode_IbgNu92mAysd",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__agentNode_HS33pQhvU168error-scriptNode_IbgNu92mAysdin",
+      "type": "step",
+      "source": "agentNode_HS33pQhvU168",
+      "sourceHandle": "error",
+      "target": "scriptNode_IbgNu92mAysd",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_IbgNu92mAysdnext_1-conditionNode_dAV4O9QrkBemin",
+      "type": "step",
+      "source": "scriptNode_IbgNu92mAysd",
+      "sourceHandle": "next_1",
+      "target": "conditionNode_dAV4O9QrkBem",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__scriptNode_IbgNu92mAysderror-jumpFlowNode_YrPgJeAiEip3in",
+      "type": "step",
+      "source": "scriptNode_IbgNu92mAysd",
+      "sourceHandle": "error",
+      "target": "jumpFlowNode_YrPgJeAiEip3",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__conditionNode_dAV4O9QrkBemtrue-jumpFlowNode_oT5PiO6ahJIpin",
+      "type": "step",
+      "source": "conditionNode_dAV4O9QrkBem",
+      "sourceHandle": "true",
+      "target": "jumpFlowNode_oT5PiO6ahJIp",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__conditionNode_dAV4O9QrkBemfalse-conditionNode_QQJ2YevMAqosin",
+      "type": "step",
+      "source": "conditionNode_dAV4O9QrkBem",
+      "sourceHandle": "false",
+      "target": "conditionNode_QQJ2YevMAqos",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__conditionNode_QQJ2YevMAqostrue-jumpFlowNode_MEDE5PcBSSj3in",
+      "type": "step",
+      "source": "conditionNode_QQJ2YevMAqos",
+      "sourceHandle": "true",
+      "target": "jumpFlowNode_MEDE5PcBSSj3",
+      "targetHandle": "in"
+    },
+    {
+      "id": "xy-edge__conditionNode_QQJ2YevMAqosfalse-jumpFlowNode_YrPgJeAiEip3in",
+      "type": "step",
+      "source": "conditionNode_QQJ2YevMAqos",
+      "sourceHandle": "false",
+      "target": "jumpFlowNode_YrPgJeAiEip3",
+      "targetHandle": "in"
+    }
+  ]
+}
