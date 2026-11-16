@@ -70,8 +70,9 @@ Plain JSON: no comments, no trailing commas. No other field is read.
 - **Git-ignored.** When the workspace is a git repository, `keen-project.json` must be in its `.gitignore` before the
   first commit — add the line. If the file is already tracked, stop and tell the person: untrack it and rotate the
   secret.
-- **Never uploaded.** It stays at the workspace root — never inside an agent project's `src/` (Shira uploads all of
-  `src/`), never in a site's `public/`, never zipped or sent.
+- **Never uploaded.** It stays at the workspace root — never inside an agent project's `src/` (Shira and keen-deploy
+  upload everything in `src/flows/` and `src/scripts/`, and Shira 0.0.6 uploaded all of `src/`), never in a site's
+  `public/`, never zipped or sent.
 - **A leak** (pushed, pasted, shared): the person presses **Rotate secret** on the MCP account and types the new secret
   into the file; you `mcp_login` again.
 

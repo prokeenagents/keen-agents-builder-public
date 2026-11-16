@@ -61,7 +61,7 @@ The engine reads **no** setting of this node. Two canvas fields exist:
 
 | Field (canvas) | JSON key | Rule | What it is for |
 |---|---|---|---|
-| Condition | `data.label` | optional, ≤ 60; no `${…}` | only the card's title. Despite its name it is **not** a condition and gates nothing |
+| Label | `data.label` | optional, ≤ 60; no `${…}` | only the card's title; it gates nothing (0.0.6 captioned this field "Condition") |
 | Assign results to dictionary property | `data.settings.value` | optional, ≤ 60 | **ignored by the engine**: no result is ever written into the dictionary. Leave it out |
 | Description | `data.description` | optional, ≤ 250 | a note under the card |
 
@@ -78,11 +78,11 @@ someone rotates the node. Cosmetic: never changes the wiring or the run. Leave i
 | `id` | yes | `parallelInNode_` + exactly 12 characters `A–Z a–z 0–9`, unique in the project. The deploy step collects the `wait` list only for ids with this prefix. A prefix that disagrees with `type` is a keen-validate error; a body that is not 12 characters is a warning. |
 | `type` | yes, `"parallelInNode"` | the node's kind for the canvas, the validator and deploy |
 | `position.x`, `position.y` | yes | where the card sits, multiples of 16. Not read by the engine; missing → a keen-validate warning. |
-| `data.label` | no | the card's title (the "Condition" field). Not read by the engine. |
+| `data.label` | no | the card's title (the "Label" field). Not read by the engine. |
 | `data.description` | no | a note, ≤ 250. Not read by the engine. |
 | `data.labelNode` | yes, `"Parallel Flows"` | fixed; anything else is a keen-validate error. Not read by the engine. |
 | `data.descriptionNode` | yes, `"Execute many flows in parallel with private context"` | fixed; anything else is a keen-validate error. Not read by the engine. |
-| `data.open` | no (write `false`) | whether the settings panel is open. Not read by the engine. |
+| `data.open` | no — leave it out | the canvas no longer reads or writes it (every panel opens closed; one already in a file is kept). Not read by the engine. |
 | `data.handlePosition` | no | see *Rotate*. Leave it out. |
 | `data.settings` | yes (write `{}`) | no key in it is read. `value` (the "Assign results" field) is ignored; do not write one. |
 | `dragHandle` | yes, `".drag-handle__custom"` | the canvas's drag handle; anything else → a warning. Not read by the engine. |

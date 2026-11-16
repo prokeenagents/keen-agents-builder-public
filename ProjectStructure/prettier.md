@@ -14,8 +14,8 @@ This is a **house standard**. Shira's Create Project does not write these files,
 
 ## Location and name
 
-- Paths: `<project root>/.prettierrc` and `<project root>/.prettierignore`. Never put them inside `src/`, because Shira
-  would upload them.
+- Paths: `<project root>/.prettierrc` and `<project root>/.prettierignore`. Never put them inside `src/`: they belong to
+  the project, not to the agent's code (Shira 0.0.7 leaves dot-files out of the upload; 0.0.6 uploaded them).
 - Optional for the platform. In a builder-made project (house standard), the builder creates both.
 - `.prettierrc` is JSON with no extension. Do not also add a `prettier` key in `package.json` or a `prettier.config.js`:
   that is one configuration in two places.
@@ -60,7 +60,7 @@ Neither file holds secrets. Both are committed.
 
 | Mistake | What happens | Write instead |
 |---|---|---|
-| `.prettierrc` placed in `src/` | Shira uploads it with the code | The project root |
+| `.prettierrc` placed in `src/` | It formats only `src/`, not the root files (and Shira 0.0.6 uploads it with the code) | The project root |
 | `src/flows/` left out of `.prettierignore` | A format run may reindent flows the canvas then rewrites, so the diffs never settle | List `src/flows/` |
 | Comments or trailing commas in `.prettierrc` | Prettier fails to read its configuration | Plain JSON |
 | `tabWidth: 2` | Scripts differ from the house style and from Shira's 4-space scaffold | `4` |

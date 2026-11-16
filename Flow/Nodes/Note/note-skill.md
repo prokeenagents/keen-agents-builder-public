@@ -29,7 +29,7 @@ Yes, the text only.
 
 | Field | JSON key | Rule | What it is for |
 |---|---|---|---|
-| Label (the note text) | `data.label`, `data.settings.value`, `data.settings.label` | the same text in all three; 1–160 characters in the canvas form's schema (keen-validate warns above 160), but the form's input box stops typing at 60, so a person can only edit a note of ≤ 60 on the canvas | what the card shows |
+| Label (the note text) | `data.label`, `data.settings.value`, `data.settings.label` | the same text in all three; 1–160 characters (the canvas form and its input box; keen-validate warns above 160) | what the card shows |
 | Description | `data.description` | optional, ≤ 250 | a secondary note; may be `""` |
 
 Plain text for people: no `${…}` is resolved.
@@ -49,7 +49,7 @@ No. There are no handles to rotate, so `data.handlePosition` is never written.
 | `data.description` | no | a secondary note. Not read by the engine. |
 | `data.labelNode` | yes, `"Note"` | fixed title; anything else is a keen-validate error |
 | `data.descriptionNode` | yes, `"Write your notes here"` | fixed subtitle; anything else is a keen-validate error |
-| `data.open` | no (write `false`) | whether the panel is open on the canvas |
+| `data.open` | no — leave it out | the canvas no longer reads or writes it (every panel opens closed; one already in a file is kept). Not read by the engine. |
 | `data.settings.value`, `data.settings.label` | yes (write both) | the note text again |
 | `dragHandle` | yes, `".drag-handle__custom"` | the canvas's drag handle; anything else → warning |
 
@@ -89,7 +89,7 @@ by it or sent to the client. Its only effects are the canvas card and the keen-v
 |---|---|---|
 | an edge to or from a Note | keen-validate error: no such handle | no edge; wire the real nodes to each other |
 | a Note as the "do nothing, then continue" step | the path ends; the Note runs nothing | a Join Flow |
-| text over 160 characters | keen-validate warning; the canvas form refuses to save it (its input box takes 60) | ≤ 60 characters, or several Notes |
+| text over 160 characters | keen-validate warning; the canvas form refuses to save it (its input box takes 160) | ≤ 160 characters, or several Notes |
 | `${dictionary.x}` in the text, expecting a value | shown as typed | plain text |
 | a password or key written in the text | it is stored in the file and deployed | never |
 | `id` not `noteNode_` + 12 letters / digits | another or an unknown node kind | `noteNode_` + 12 characters |

@@ -54,11 +54,11 @@ its `agentId` names the summary, and its `agentName` appears on the usage record
 
 | Menu · field | JSON key (`data.settings.…`) | Rule | What it is for |
 |---|---|---|---|
-| Model · Company / Model | `llm.company`, `llm.model`, `llm.modelId` | company + model **required**; the same providers, models and ids as the LLM node (see `LLM/llm-skill.md`) | the model that writes the summary. `modelId` is only for the canvas |
+| Model · Company / Model | `llm.company`, `llm.model`, `llm.modelId` | company + model **required** (the canvas refuses Save without them and, while none is saved, says "No model saved yet" / "A Summarizer node needs a model."); the same providers, models and ids as the LLM node (see `LLM/llm-skill.md`) | the model that writes the summary. `modelId` is only for the canvas |
 | Model · Max Tokens | `llm.parameters.maxTokens` | the canvas caps it at 1500. The engine sends `min(maxTokens, 1500)`, or 1500 when it is absent or not a positive number | the summary's length cap. Below 1500 it may cut the summary, and a cut summary is discarded |
 | Model · Temperature / Top p | `llm.parameters.temperature`, `top_p` | as on the LLM node | low (≈ 0.2) keeps summaries factual |
 | Model · reasoning | `effort` / `reasoningEffort` / `thinkingLevel` / `thinkingBudget` | as on the LLM node | keep it off or low; see the warning below |
-| Instructions | `prompts[]` `{ id, role: "system", content }` | the canvas writes exactly one system turn, pre-filled with the recommended prompt; `content` takes `${…}` | *how* to summarize. The platform adds the previous summary and the new turns |
+| Instructions | `prompts[]` `{ id, role: "system", content }` | the canvas writes the first prompt as the system turn (pre-filled with the recommended prompt on a new node; any further prompt in the file is kept); `content` takes `${…}` | *how* to summarize. The platform adds the previous summary and the new turns |
 
 **Reasoning warning.** Reasoning tokens count toward the 1500-token cap. A summary cut there is discarded and
 the Summarizer fails. keen-validate and deploy **warn**, but do not refuse, for `o1` / `o4-mini` (keen-validate
@@ -83,7 +83,7 @@ The default is `top`: In at the top, Fallback on the left, Out at the bottom. Do
 | `data.label`, `data.description` | write `""` | the canvas has no field for them. Not read by the engine |
 | `data.labelNode` | yes, `"Summarizer"` | fixed; anything else → keen-validate error |
 | `data.descriptionNode` | yes, `"Writes the chat summary for an LLM node's Summary output"` | fixed; anything else → keen-validate error |
-| `data.openLLM`, `data.openPrompt` | no (write `false`) | which menu is open. Not read by the engine |
+| `data.openLLM`, `data.openPrompt` | no — leave them out | the canvas no longer reads or writes them (both menus open closed; ones already in a file are kept). Not read by the engine |
 | `data.handlePosition` | no | see *Rotate*. Leave it out |
 | `data.settings.llm.company` / `.model` | **yes** | missing on a reached Summarizer → error `A Summarizer node needs a model.`; a company other than anthropic / openai / google → error; an unknown model passes keen-validate and fails at run time (`bad-target`) |
 | `data.settings.llm.modelId` | yes (for the canvas) | the model's id from the LLM table. Not read by the engine |

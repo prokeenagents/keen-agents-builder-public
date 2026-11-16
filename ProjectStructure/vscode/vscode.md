@@ -16,10 +16,12 @@ Who reads it:
 - Path: `<project root>/.vscode/`, beside `src/` and `package.json`. The name is fixed: a dot, then lowercase `vscode`.
 - Required: yes. Shira detects a project only when all five markers exist: `.vscode/keen.json`, `src/keen-tools.json`,
   `package.json`, `src/flows/`, `src/scripts/`.
-- Created by: Shira's **Create Project**, which writes `keen.json` and `settings.json`. A builder that works without
-  VS Code creates the folder and both files by hand.
+- Created by: Shira's **Create Project**, which writes `keen.json` and `settings.json` when they are missing. A builder
+  that works without VS Code creates the folder and both files by hand.
 - Shira still treats a folder as empty when it holds only `.vscode`, `.git` or `.DS_Store`, so **Create Project** stays
-  enabled after you add a `.vscode/` by hand.
+  enabled after you add a `.vscode/` by hand. Shira 0.0.7 keeps a filled-in `keen.json` (and an existing
+  `settings.json`) and says `Flow Builder project created — your existing .vscode/keen.json was kept as it is.`;
+  0.0.6 overwrote both.
 
 ## Structure
 
@@ -50,7 +52,7 @@ share it. `settings.json` holds no secrets and may be committed.
 | Mistake | What happens | Write instead |
 |---|---|---|
 | The folder is named `vscode/` or `.VSCode/` | Shira does not detect the project; the debuggers find no `keen.json` | `.vscode/` exactly |
-| `keen.json` sits in the project root or in `src/` | Shira does not detect the project. Inside `src/`, Shira's Upload would also send it with the code | `.vscode/keen.json` |
+| `keen.json` sits in the project root or in `src/` | Shira does not detect the project (Shira 0.0.7 does not upload a `src/keen.json`, 0.0.6 did) | `.vscode/keen.json` |
 | `.gitignore` lists `.vscode/` | Works, but `settings.json` is no longer shared | `.vscode/keen.json` |
 | A `.env` with deploy values put here "to keep it together" | It is committed unless ignored, and keen-deploy never reads it here | Keep keen-deploy's `.env` in the directory you run it from, outside the project |
 

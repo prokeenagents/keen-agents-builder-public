@@ -93,7 +93,7 @@ the run. Leave it out when you write the node.
 | `data.description` | no | a note under the card, ≤ 250. Not read by the engine. |
 | `data.labelNode` | yes, `"Assignment"` | fixed title of this kind; anything else is a keen-validate error. Not read by the engine. |
 | `data.descriptionNode` | yes, `"Set properties to the current dictionary"` | fixed subtitle; anything else is a keen-validate error. Not read by the engine. |
-| `data.open` | no (write `false`) | whether the settings panel is open on the canvas. Not read by the engine. |
+| `data.open` | no — leave it out | the canvas no longer reads or writes it (every panel opens closed; one already in a file is kept). Not read by the engine. |
 | `data.handlePosition` | no | see *Rotate*. Leave it out. |
 | `data.settings.value`, `data.settings.label` | yes (write both) | the Label text. Not read by the engine. |
 | `data.settings.keyValuePairs` | no (write it) | the pairs; the only thing the engine reads. Absent or `[]` = nothing is written. Not an array, more than 10 pairs, a pair without a string `key`, a key over 100, a value over 200 or a duplicate key → keen-validate error. A `${x.…}` whose root is not `dictionary` / `session` → warning (it stays literal text). |

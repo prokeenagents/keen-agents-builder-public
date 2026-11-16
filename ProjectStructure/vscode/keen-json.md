@@ -18,8 +18,10 @@ Who reads it:
 
 - The path is fixed: `<project root>/.vscode/keen.json`.
 - It is required, because it is one of Shira's five project markers.
-- Shira's **Create Project** writes it with `[REPLACE_WITH_…]` placeholders. A builder working without VS Code writes it
-  by hand, or copies it from the person.
+- Shira's **Create Project** writes it with `[REPLACE_WITH_…]` placeholders when there is none (or it is blank). A
+  filled-in one is kept byte for byte, and the toast says `Flow Builder project created — your existing
+  .vscode/keen.json was kept as it is.` (0.0.6 overwrote it). A builder working without VS Code writes it by hand, or
+  copies it from the person.
 
 ## Structure
 
@@ -55,7 +57,7 @@ Shira writes no other properties, and every reader ignores any others.
 ## Security
 
 This file holds a deployment token and a password, so it must be git-ignored (`.vscode/keen.json` in `.gitignore`).
-Shira's Create Project adds that line itself. The file is never uploaded, because Upload sends only `src/`.
+Shira's Create Project adds that line itself. The file is never uploaded, because Upload sends only `src/flows/`, `src/scripts/` and `src/keen-tools.json`.
 A builder never prints, logs, commits or echoes its values. In examples, use placeholders like `<deployment token>`.
 
 ## Mistakes that break it

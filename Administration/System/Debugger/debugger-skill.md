@@ -13,7 +13,7 @@ how to attach VS Code. The debuggers let a person stop a real run at a breakpoin
 The debuggers exist on sandbox servers (where agents are built and tested). They are **off by default**. While off,
 every connection is refused.
 
-How a session works: the Keen VS Code extension (**0.0.6 or newer**) signs in with the person's own console account
+How a session works: the Keen VS Code extension (Shira Flow Builder **0.0.7**, the console offers it; 0.0.6 or newer can sign in) signs in with the person's own console account
 from `.vscode/keen.json`, receives a single-use debug pass valid for 5 minutes, and attaches. The pass debugs ONE
 space (the `space` in `keen.json`): only runs of that space that reach a breakpoint stop; everything else runs at
 full speed. One VS Code window per debugger at a time — a second is refused (`Debugger in use`).
@@ -46,10 +46,11 @@ must be inspected step by step. For anything on a live, non-sandbox run use the 
 ## MFA
 
 - **Attaching** needs two-step sign-in on the person's own account, the owner included — although `dg1` is a read
-  right. Without it the platform refuses the ticket (403 `MFA required!`), and Shira Flow Builder 0.0.6 shows that as
-  *Your role has no Debugger permission — ask the owner or an admin.* — so when that line appears for a person who has
-  the right, check their two-step sign-in first. With MFA on, the extension asks the 6-digit code on every attach and
-  every reconnect.
+  right. Without it the platform refuses the ticket (403 `MFA required!`), and Shira Flow Builder 0.0.7 shows
+  *The debugger needs two-step sign-in on your account — set it up in the console (My Account › Security).* (0.0.6
+  showed the no-permission line instead — on 0.0.6, check the two-step sign-in of a person who has the right). With MFA
+  on, the extension asks the 6-digit code on every attach and every reconnect; a wrong code is asked again, up to 4 per
+  sign-in.
 - The switch and **Kill and resume** are changes: `MFA required!` without it.
 
 Why: a debugger shows live conversations. With only a stolen password someone could switch the debugger on and read
@@ -103,15 +104,17 @@ After off / kill a block shows **Sessions closed**, **Runs resumed** and **Insta
 not answer within 2 seconds still picks the change up shortly. The card shows **Last changed by <name> · <time>**.
 Every change is written to the audit log (switch, attach, detach, refusals).
 
-Refusals at attach time, in the platform's words → what Shira Flow Builder 0.0.6 shows (every other 403 — `Forbidden`,
-`MFA required!` — becomes the no-permission line):
+Refusals at attach time, in the platform's words → what Shira Flow Builder 0.0.7 shows (it maps each by the
+platform's words; any other refusal is shown with the platform's words verbatim):
 
 | The platform | The extension |
 |---|---|
 | 403 `Debugger is off` | *The debugger is off — the owner or an admin switches it on in the console (Debugger page).* |
-| 403 `Forbidden` (no **Debugger** right) or `MFA required!` | *Your role has no Debugger permission — ask the owner or an admin.* |
-| 404 `Space not found` | a line naming the `space` from `keen.json` as not found |
-| 406 | *The platform refused the debug ticket (406) — is "space" a space id?* |
+| 403 `Forbidden` (no **Debugger** right) | *Your role has no Debugger permission — ask the owner or an admin.* |
+| 403 `MFA required!` | *The debugger needs two-step sign-in on your account — set it up in the console (My Account › Security).* |
+| 404 `Space not found` | *Space "<space>" was not found — check "space" in .vscode/keen.json.* |
+| 406 about `space` | *The platform refused the debug ticket (406) — is "space" a space id?* |
+| any other 403 / 404 / 406 (e.g. 403 `MCP accounts may not access this resource`) | *The platform refused the debug ticket (<status>): <the platform's words>* |
 | close 1013 (in use) | *The flow / script debugger is already in use — one window per debugger at a time.* |
 
 The full list with every fix: [../../../ShiraFlowBuilder/debugging.md](../../../ShiraFlowBuilder/debugging.md). Use the
@@ -139,7 +142,7 @@ Not available for Debugger. The **Debugger** right is part of a role's export (s
 | `keen.json` committed | Password + deployment token leaked | `.gitignore` first; if leaked, change the password and reset the space's token |
 | Breakpoint in a normal script while using the **Flow Debugger** | Never stops (the Flow Debugger stops only at the nodes marked in the flow view) | Use the **Script Debugger** for `scripts/*.js` |
 | Wrong `space` in `keen.json` | `Space not found`, or the breakpoints of the real space never bind | Use the space the code is deployed to |
-| An extension older than 0.0.6 on an account with MFA | It cannot sign in | Update the extension |
+| An extension older than 0.0.6 on an account with MFA | It cannot sign in | Update the extension to 0.0.7 |
 | Expecting the builder (MCP) to attach | Refused — people only | The person attaches in VS Code |
 
 ## Example

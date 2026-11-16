@@ -1,23 +1,26 @@
 # Shira's checks in the Problems panel
 
-> **Keen 15.3 · Shira Flow Builder 0.0.6.**
+> **Keen 15.3 · Shira Flow Builder 0.0.7.**
 
 ## What it is
 
 Shira scans the project and writes what it finds to VS Code's **Problems** panel (**View → Problems**), source
-**Flow Builder**, each entry pinned to the first line of the file (or to the folder) it is about. The same findings
+**Flow Builder**, each entry pinned to the first line of the file (or to the folder) it is about — a refused import to
+its own line. The same findings
 fill the panel's red `✕` lines and `⚠ Structure warnings:` list and the number badge on the activity-bar icon
-(`panel.md`). **Any error marks the project `— invalid` and disables Connect and Upload Project.** Warnings do not.
+(`panel.md`). **Any error marks the project `— invalid`, disables Connect and Upload Project, and holds auto-sync**
+(`upload.md`; Disconnect stays enabled). Warnings do not.
 
 The scan runs only when the folder is a project (all five markers — `project.md` §1). It re-runs:
 
 - on any file **created or deleted** anywhere in the workspace,
-- on a **change of a `.flow` file** (300 ms after the last write — one canvas save can write twice),
+- on a **change of a `.flow` file, a `.js` file or `keen-tools.json`** (300 ms after the last write — one canvas save
+  can write twice),
 - when the Shira view becomes visible again, and when workspace folders change.
 
-The first scan happens when the Shira view is opened (or at the first file event after the extension activated). A change of a `.js` file's content does not trigger a scan.
+The first scan happens when the Shira view is opened (or at the first file event after the extension activated).
 
-## The rules (11)
+## The rules (15)
 
 | # | Where | Severity | Exact message | When |
 |---|---|---|---|---|
@@ -32,9 +35,18 @@ The first scan happens when the Shira view is opened (or at the first file event
 | 9 | a `.flow` | **Error** | `A Summarizer node's In takes only a Summary output or a Summarizer's Fallback.` | any other edge enters a Summarizer |
 | 10 | a `.flow` | **Error** | `A Summarizer node's Fallback connects only to a Summarizer node.` | a Summarizer's Fallback has more than one edge, or one to another node type |
 | 11 | a `.flow` | **Error** | `Summarizer Fallbacks must not form a loop.` | following Summarizer Fallbacks comes back to the start (a self-loop too) |
+| 12 | a `.flow` in `src/flows` | **Error** | `flows/<file>: invalid JSON — <the parser's reason>` · `flows/<file>: the top level must be an object with "nodes" and "edges" lists` · `flows/<file>: "nodes" must be a list` · `flows/<file>: "edges" must be a list` · `flows/<file>: node #<n> is not an object` · `flows/<file>: node #<n> has no id` · `flows/<file>: edge #<n> is not an object` | the file is not JSON, or not the `.flow` shape the deploy builds (`<n>` counts from 1) |
+| 13 | **both** `.flow` files (one, for a repeat inside a file) | **Error** | `flows/<first file>: <id> — the node id is used again in flows/<other file>` · `flows/<file>: <id> — the node id is used twice in this file` | a node id used twice anywhere in the project — all flows together, walked sorted by file name as the deploy does; `<first file>` is where it appears first |
+| 14 | `src/keen-tools.json` | **Error** | `keen-tools.json: invalid JSON — <the parser's reason>` · `keen-tools.json: "tools" must be a list of tool objects` | not JSON, or not `{ "tools": [ {…}, … ] }` (no `tools` at all is fine) |
+| 15 | a `.js` under `src/scripts` or `src/flows`, on the import's line | **Error** | `Unauthorized import "<x>" - only relative (./, ../) imports and the engine's system/ modules (system/chat, system/log, system/session, system/tools, system/agent, system/cookies, system/http, system/dictionary, system/settings, system/secrets) allowed` | an `import` that is neither relative (`./`, `../`) nor one of those ten modules: `node:*`, `system/files`, `lodash`, `/etc/x.js` |
 
-Rules 7–11 run on every top-level `.flow` in `src/flows` and use the deploy service's own words (the Summarizer:
-`../Flow/Nodes/Summarizer/`). A `.flow` that is not valid JSON is **skipped silently** by them — no entry at all.
+Rules 12–15 are the deploy's own refusals in its own words, so the panel says them before an upload is refused. Rules
+7–11 also use the deploy's words (the Summarizer: `../Flow/Nodes/Summarizer/`) and run only on a `.flow` that passes
+rule 12. Rule 15 reads the same files the deploy scans — every `.js` of the upload (dot-entries and `node_modules` left
+out, the platform's own `debux.js` never) — with a real JavaScript parser: an `import` inside a comment or a string is
+no import. A script that does not parse yet (being typed) gives no entry; the editor shows its syntax error, and the
+deploy would refuse it (`Code parsing failed: …`). Only `import` declarations are checked, as the deploy checks them: an
+`export … from 'node:fs'` passes both — write only `import`s of the allowed modules.
 
 Two more name checks show up as **toasts**, not Problems entries: creating or renaming a `.flow` in `src/flows` / a
 `.js` in `src/scripts` with a bad name shows `<file> — Flow names must be PascalCase — start with a capital letter,
@@ -56,12 +68,16 @@ the other does not.
 | 5 script file name | **not checked** | not checked |
 | 6 no `.flow` | error | refuses: `flows/ contains no .flow files` |
 | 7–11 Summary / Summarizer | errors, same words; plus warnings (an unreached Summarizer, an LLM node with "Interact with DB" off, a reasoning model on a Summarizer) | refuses with the same words, prefixed `flows/<F>: <nodeId> — ` |
+| 12 `.flow` not JSON / wrong shape | error | refuses with the same words |
+| 13 node id used twice | error | refuses with the same words |
+| 14 `keen-tools.json` shape | error, plus its names and entries | refuses with the same words |
+| 15 import not allowed | error | the security scan refuses: `Upload rejected: Project rejected by the security scan …` with the same words |
 
-**Only keen-validate catches** (Shira says nothing, the panel stays `— detected`): a `.flow` that is not valid JSON or
-not `{ nodes, edges }`; a node id used twice (in one file or across flows — the deploy refuses it); every node's own
-settings; Run / Jump / Flow Pointer / Parallel Context / flow-tool targets that resolve to no Start; a Script node's
-file that does not exist; `keen-tools.json` shape, names and entries; the script lint (forbidden imports and globals the
-deploy's security scan refuses, `exec` exported); `.vscode/keen.json` not git-ignored.
+**Only keen-validate catches** (Shira says nothing, the panel stays `— detected`): every node's own settings; Run /
+Jump / Flow Pointer / Parallel Context / flow-tool targets that resolve to no Start; a Script node's file that does not
+exist; each tool entry in `keen-tools.json` (names, `entry` under `tools/`); the rest of the script lint (forbidden
+globals such as `eval`, `require`, `process`, a dynamic `import()`, `exec` exported); `.vscode/keen.json` not
+git-ignored.
 
 **Only Shira catches**: script file names (rule 5), non-`.js` files under `src/scripts` (rule 4), and the five project
 markers (a missing `package.json` or `.vscode/keen.json` means "not a project" — keen-validate does not require them,
@@ -77,9 +93,11 @@ away by itself on the next scan.
 - You cannot read the person's Problems panel; you can predict it. After writing files, check them against the
   table: bad script names (`get-order.js`, `shop_api.js`), a README or JSON file inside `src/scripts`, anything but
   `.flow` files in `src/flows`, the Summary wiring.
-- Run `keen-validate <project>`; it covers rules 1–3, 6–11 and much more.
+- Run `keen-validate <project>`; it covers rules 1–3, 6–15 and much more.
 - Keep notes and docs for a service outside `src/` (`.claude/skills/<service>-service/SKILL.md`,
   `../ProjectStructure/SKILL.md`) — inside `src/scripts` they are warnings and they get uploaded.
+- Any error you leave in a file holds the person's auto-sync until it is fixed (`upload.md`) — clear them before you
+  tell the person a change is live.
 
 ## Mistakes that break it
 
@@ -87,8 +105,10 @@ away by itself on the next scan.
 |---|---|---|
 | A file `src/scripts/services/docStore/doc-store-utils.js` (folder names are not checked, file names are) | Error 5 → `— invalid`, Connect off | `utils.js`, `docStoreUtils.js` |
 | `src/flows/Assistant.flow.bak` or `src/flows/notes.md` | Warning only in Shira, but the deploy refuses the whole project | keep only `.flow` files in `src/flows` |
-| Trusting "no Problems" as "deployable" | A broken JSON flow or a duplicate node id passes Shira and fails the deploy | `keen-validate` first |
-| A `.flow` hand-edited with a syntax error | No Problems entry; the canvas cannot show it as it is | validate the JSON; `keen-validate` names the line |
+| Trusting "no Problems" as "deployable" | A wrong node setting or a Run / Jump target with no Start passes Shira and fails at run time | `keen-validate` first |
+| A `.flow` hand-edited with a syntax error | Error 12 `flows/<file>: invalid JSON — …`, auto-sync holds; the canvas opens it as an error state | fix the JSON; `keen-validate` names the line |
+| A flow copied by hand (you, git, a terminal) with the same node ids | Error 13 on both files; the copy-on-create regeneration runs only in the person's VS Code, and not on later edits | give the copy's nodes new ids and re-point its edges |
+| `import { createHash } from 'node:crypto'` in a script | Error 15 on that line | `system/tools` for ids, `system/http` for calls |
 
 ## Example
 

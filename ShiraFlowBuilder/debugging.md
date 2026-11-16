@@ -1,6 +1,6 @@
 # Debugging with Shira: the Flow Debugger and the Script Debugger
 
-> **Keen 15.3 · Shira Flow Builder 0.0.6.**
+> **Keen 15.3 · Shira Flow Builder 0.0.7.**
 
 The console side (the switch, the **Debugger** permission, Kill and resume, the 15-minute and 1-hour limits) is in
 `../Administration/System/Debugger/debugger-skill.md`; two-step sign-in in
@@ -31,7 +31,8 @@ Both debug the code **as deployed** in the space, never the files on disk, and b
 5. **The project deployed** (`upload.md`), and for the Script Debugger the local scripts equal to the deployed ones —
    breakpoints bind by path (`src/…` ↔ the deployed project) and by line.
 6. **A run to stop:** a chat or a test run in that space that reaches the marked node / line.
-7. **Shira 0.0.6** — older versions cannot answer the two-step code.
+7. **Shira 0.0.7** (0.0.6 also signs in, but shows `MFA required!` as a missing permission and ends on a wrong code;
+   older versions cannot answer the two-step code).
 
 ## What the person does — Flow Debugger
 
@@ -78,9 +79,16 @@ code and ticket never appear in a toast, the Debug Console or the Output.
 
 - The code is 6 digits (spaces are ignored: `123 456` works); anything else: `The code is 6 digits.`
 - **Send a new code** → the note `A new code is on its way.`; too early or too many (60 s apart, 3 per sign-in) →
-  `A new code can be sent in <n> s — enter the last one meanwhile.` (or `No new code can be sent now — enter the last one.`).
-- **One wrong code ends the attempt** with the same words as a wrong password (`Sign-in refused — …`); the person
-  presses Start again. Escape ends it with `Sign-in cancelled — no two-step code was entered.`
+  `A new code can be sent in <wait> — enter the last one meanwhile.` (or `No new code can be sent now — enter the last one.`).
+- **A wrong code is asked again**, with the note `That code was not accepted — enter the current one.` — never the
+  wrong-password text. The platform checks at most **4** codes per sign-in: after the 4th wrong one (or when a resend
+  finds the step gone — it lives 300 s) the attempt ends with
+  `The two-step code step has ended (too many wrong codes, or it expired) — start the debugger again to sign in anew.`
+- **The code budget:** 20 wrong codes in 24 h block the code step for 24 h. The platform then answers with the wait,
+  and the attempt ends with `Too many sign-in attempts — try again in <wait>.` (`24 h` right after the block).
+- Escape ends it with `Sign-in cancelled — no two-step code was entered.` At most 7 prompts per sign-in (4 codes + 3
+  resends).
+- `<wait>` reads `<n> s` below 2 minutes, `<n> min` below 2 hours, `<n> h` above.
 - A reconnect after a drop asks the code again. If nobody answers, the debugger waits on the prompt.
 
 ## Where it connects
@@ -119,14 +127,18 @@ The instance's TLS certificate is verified; a certificate problem shows as `Conn
 | `Set "server" in .vscode/keen.json first.` · `Set "space" in .vscode/keen.json first.` · `"server" in .vscode/keen.json is not a URL.` | the field | fix it |
 | `"debugHost" in .vscode/keen.json must be a host name only (no scheme, port or path).` | e.g. `https://keen.example.com:7101` | `keen.example.com`, or remove it |
 | `open the project folder to debug flows.` / `… to debug scripts.` | no folder open | open the project folder |
-| `Sign-in refused — check "user" and "password" in .vscode/keen.json (your console account).` | wrong e-mail / password, a blocked account, **or a wrong two-step code** | fix the login; Start again and type the current code |
-| `Too many sign-in attempts — try again in <n> s.` | the sign-in throttle | wait; fix the login first |
+| `Sign-in refused — check "user" and "password" in .vscode/keen.json (your console account).` | the password step refused: wrong e-mail / password, a blocked account | fix the login |
+| `That code was not accepted — enter the current one.` (the code box's note) | a wrong two-step code | type the current code |
+| `The two-step code step has ended (too many wrong codes, or it expired) — start the debugger again to sign in anew.` | 4 wrong codes on one sign-in, or the step expired (300 s) | Start again |
+| `Too many sign-in attempts — try again in <wait>.` (`… try again later.` with no wait given) | the sign-in throttle (password step), or the code budget (20 wrong codes in 24 h → 24 h) | wait the time shown; fix the login first |
 | `Set up two-step sign-in in the console first (My Account › Security).` | the organisation requires two-step sign-in and the account has none | the person sets it up, Start again |
 | `Sign-in cancelled — no two-step code was entered.` | the prompt was dismissed | Start again |
 | `The debugger is off — the owner or an admin switches it on in the console (Debugger page).` | the switch is off (or was turned off during the session) | owner / admin turns it on |
-| `Your role has no Debugger permission — ask the owner or an admin.` | the ticket was refused 403: **no Debugger permission, OR the account has no two-step sign-in** (the platform answers `MFA required!`, Shira shows this line), or an MCP account | check the role **and** that two-step sign-in is on for the account |
-| `Space "<space>" was not found — check "space" in .vscode/keen.json.` | unknown space id | the Space ID from the console |
-| `The platform refused the debug ticket (406) — is "space" a space id?` | `space` is not a valid id (a name was typed) | the Space ID |
+| `Your role has no Debugger permission — ask the owner or an admin.` | the ticket was refused 403 `Forbidden`: no Debugger permission (or a gone / blocked account) | a role with the Debugger permission |
+| `The debugger needs two-step sign-in on your account — set it up in the console (My Account › Security).` | the ticket was refused 403 `MFA required!`: the account has no two-step sign-in | the person sets it up, Start again |
+| `Space "<space>" was not found — check "space" in .vscode/keen.json.` | the ticket was refused 404 `Space not found` | the Space ID from the console |
+| `The platform refused the debug ticket (406) — is "space" a space id?` | the ticket was refused 406 about `space`: not a valid id (a name was typed) | the Space ID |
+| `The platform refused the debug ticket (<status>): <the platform's words>` (or `… (<status>).` with no words) | any other 403 / 404 / 406 of the ticket, its words verbatim — e.g. `The platform refused the debug ticket (403): MCP accounts may not access this resource` | act on the words |
 | `An administrator ended the debug session (Kill & Resume).` | **Kill and resume** in the console | Start again when wanted |
 | `Debug access was revoked — your role, password or the space changed.` | revoked | check role / password / space, Start again |
 | `The <flow\|script> debugger is already in use — one window per debugger at a time.` | another window or person holds that debugger | close the other session (or an admin uses Kill and resume) |
@@ -151,7 +163,7 @@ The instance's TLS certificate is verified; a certificate problem shows as `Conn
 
 | Mistake | What happens | Do instead |
 |---|---|---|
-| An account without two-step sign-in | `Your role has no Debugger permission — …` although the role has it | turn on two-step sign-in (My Account → Security) |
+| An account without two-step sign-in | `The debugger needs two-step sign-in on your account — …` (on 0.0.6: `Your role has no Debugger permission — …` although the role has it) | turn on two-step sign-in (My Account → Security) |
 | Breakpoints set in a script while using **Start Flow Debugger** | it never stops there | **Start Script Debugger** for `.js` |
 | Debugging right after editing, before the upload finished | lines and nodes do not match what runs | wait for `Project deployed ✓` / `Project synced` |
 | `space` = the space's name | `… (406) — is "space" a space id?` | the Space ID |

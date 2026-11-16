@@ -86,7 +86,7 @@ node is rotated. It is cosmetic: it changes where the dot is drawn, never the wi
 | `data.description` | no, ≤ 250 | a note under the card (the canvas form's cap). Not read by the engine or deploy. No `${…}` |
 | `data.labelNode` | fixed `"Start Flow"` | the card's fixed title; keen-validate errors on any other text. Not read by the engine |
 | `data.descriptionNode` | fixed `"Flow entry point"` | the card's fixed subtitle; same rule |
-| `data.open` | no (`false`) | whether the settings panel is open on the canvas. Not read by the engine or deploy; write `false` |
+| `data.open` | no — leave it out | the canvas no longer reads or writes it (every panel opens closed; one already in a file is kept). Not read by the engine. |
 | `data.handlePosition` | no | the side of the output dot; see Rotate. Absent until rotated; cosmetic |
 | `data.settings.label` | yes | the entry name; see Settings. Read by deploy only. No `${…}` |
 | `data.settings.value` | yes (same text as `label`) | see Settings. Not read by deploy and not read by the engine; the canvas writes it, and a Start with only `value` registers no entry. No `${…}` |

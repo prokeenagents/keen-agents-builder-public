@@ -1,6 +1,6 @@
 # The canvas — the visual `.flow` editor
 
-> **Keen 15.3 · Shira Flow Builder 0.0.6.**
+> **Keen 15.3 · Shira Flow Builder 0.0.7.**
 
 What a person sees and does on the canvas, and exactly what the canvas reads from and writes to a `.flow` file.
 Read it before you write or rewrite a `.flow` that a person also opens on the canvas. What each node *does* at run
@@ -14,8 +14,8 @@ each node (handles, forms, which field sets which property) is in `canvas-nodes.
 - The canvas app is **bundled in the extension** (`media/builder/`) and runs directly inside the editor's webview.
   It needs no server and no network.
 - The `.flow` file is plain JSON: `{ "nodes": [ … ], "edges": [ … ] }`. The canvas works on the open VS Code text
-  document: the extension parses it and hands `nodes` / `edges` to the canvas, and every change on the canvas replaces
-  the whole document text.
+  document: the extension hands the document's text to the canvas, which parses and checks it (*What a hand-written
+  `.flow` needs to open cleanly*, below), and every change on the canvas replaces the whole document text.
 - One canvas per document (multiple canvases on the same file are not supported). The webview is kept alive while
   its tab is hidden, so switching tabs keeps its state.
 
@@ -25,7 +25,8 @@ each node (handles, forms, which field sets which property) is in `canvas-nodes.
   theme, the flow, the file's breakpoints and the file's view settings (palette, pan / zoom).
 - The palette starts **hidden**. On the very first open of a file (no saved pan / zoom) the canvas fits the whole flow
   into view once; after that it restores the last pan / zoom of that file.
-- **Opening never writes the file.** The canvas loads what is there, without checking or changing it.
+- **Opening never writes the file.** The canvas checks the file's shape and either draws it as it is or shows the
+  error state (below); it changes nothing in either case.
 - A new flow made with the extension's Create Flow command starts as `{ "nodes": [], "edges": [] }` (how to create
   one: `project.md`).
 
@@ -115,34 +116,33 @@ Each card has a head with the node's palette name (the drag grip) and small icon
 - Clicking an icon opens the panel **to the right of the card** and selects that node; clicking it again closes it. On
   the LLM and the Summarizer only one of the node's panels is open at a time. Several nodes may have panels open; a
   panel of a node that is not selected is dimmed and slightly blurred.
-- **Which panel is open is saved in the file**: `data.open` (Settings / General), and on the LLM and Summarizer
-  `data.openLLM` / `data.openPrompt`. Opening or closing a panel is therefore a change to the file (it marks the file
-  modified and is one undo step). A file written with `"open": true` opens with that panel open.
+- **Which panel is open is not part of the file.** Opening or closing a panel writes nothing, does not mark the file
+  modified and is no undo step. Every panel starts closed when a file opens. The keys `data.open`, `data.openLLM` and
+  `data.openPrompt` that older files carry are neither read nor written — they stay in the file as they are.
 - Every form has its own **Save** button, enabled only after a field was changed (the LLM's and Summarizer's model
-  menus also need a company and model). Invalid fields show their message under the field in red and Save does not
-  write anything. Typing in a field never drags the card.
+  menus also need a company and model, and are enabled without a change while no model is saved — *The model menus*,
+  below). Invalid fields show their message under the field in red and Save does not write anything. Typing in a field
+  never drags the card.
 - **Rotate connectors** moves the input to the next side, clockwise Bottom → Left → Top → Right, and the other
   handles keep their place relative to it. It writes `data.handlePosition` (`"top"`, `"right"`, `"bottom"` or
   `"left"`); the key is absent until the first rotate. Default: the input on top (Start Flow and Flow Pointer: their
   single output at the bottom; End Flow / Jump Flow: their input on top).
 
-**A form reads the node's data once.** A form's fields are filled when the card is first drawn, and then only from
-its own Save. A later change to the node's data that does not come from that form — the file reloaded after it
-changed on disk, an undo, or another panel of the same node — is **not** shown in the form. If the person then edits
-one field and presses Save, the form writes **all** its fields, so its old values overwrite the newer ones. Two places
-where this bites with no outside change at all:
+**A form always shows the node's current data.**
 
-- **LLM:** the Prompt Settings form also writes `data.label` and `data.description` back with the values the node had
-  when its card was drawn — so saving the prompts **erases a Description saved in General Settings** in the same
-  session.
-- **Flow Pointer, Parallel Flows, Parallel Context:** their forms read their fields from other keys than they write
-  (see `canvas-nodes.md`), so re-opening shows the fields **empty**. Parallel Flows then saves `""` over its label and
-  "Assign results" field; Flow Pointer and Parallel Context refuse to save until every required field is typed again.
+- **Each form loads exactly the keys it saves** (the key map per node is in `canvas-nodes.md`), so re-opening a saved
+  node shows what was saved — on every node, the Flow Pointer, Parallel Flows and Parallel Context included.
+- **A form follows the file.** Its fields are filled again each time its panel opens, and whenever the node's data
+  changes underneath it — the file rewritten from outside (a text edit, a change on disk VS Code loads), an undo or a
+  redo. A change to fields another form owns does not touch an edit in progress.
+- **A Save writes only that form's own fields**, onto the node's data as it is at that moment. Every other key in
+  `data` and `data.settings` is kept — a Description saved in General Settings survives a Prompt Settings Save, the
+  LLM Settings Save keeps any `specialRules` entry other than its two switches, and unknown keys stay.
 
 **The editors.**
 
-- *Text fields* are plain inputs. Several have an input box that stops typing earlier than the form's own limit
-  (e.g. Condition: the box takes 60 characters, the check allows 150) — `canvas-nodes.md` gives both for each field.
+- *Text fields* are plain inputs. Each input box stops typing at exactly the form's own limit for that field (e.g.
+  Condition: 150) — `canvas-nodes.md` gives the limit and the accepted shape of each field.
 - *Key/Value Pairs* (Assignment, Script): rows of Key + Value with **Add Pair** (disabled at 10 rows) and a remove ✕
   per row.
 - *Instructions / prompts* (LLM Prompt Settings, Summarizer Instructions): a rich-text editor that stores
@@ -169,10 +169,18 @@ p exclude each other shows **Sampling Parameter (select one)**, and only the cho
 the model (minimum = maximum) is shown disabled. Choosing another company or model resets every parameter to that
 model's defaults.
 
-The list comes from the **model catalogue bundled inside the canvas** (22 models, see `canvas-nodes.md`). The
-extension setting `flowBuilder.aiModels` does **not** reach the canvas in 0.0.6: the extension sends it only to the
-sidebar panel (`panel.md`), and the bundled canvas never reads it. A node whose saved `modelId` is not in the bundled
-catalogue opens with its company selected, the Model box empty, and the sliders of the catalogue's first model.
+**While the node has no model saved**, the menu shows the catalogue's first model with a notice above it — title
+"No model saved yet", then on the LLM "The LLM node runs only with a model. Choose one and Save — the model shown is
+not in the file until then." and on the Summarizer "A Summarizer node needs a model. Choose one and Save — the model
+shown is not in the file until then." Save is then enabled without a change, so the model shown can be saved as it
+is. Save is never possible without a company and model.
+
+The list comes from the **model catalogue bundled inside the canvas** — 24 models, **identical to the platform's own
+model list**, in the same order (see `canvas-nodes.md`). It must be identical: a choice-type parameter is saved as
+the option's index, and the platform reads that index against its own list. The extension setting
+`flowBuilder.aiModels` does **not** reach the canvas: the bundled canvas never reads it. A node whose saved `modelId`
+is not in the catalogue opens with its company selected, the Model box empty, and the sliders of the catalogue's first
+model.
 
 ## Selecting, moving, copying, deleting, undo
 
@@ -188,20 +196,20 @@ catalogue opens with its company selected, the Model box empty, and the sliders 
 | Save | **Ctrl / Cmd + S** |
 
 - **Paste** gives every pasted node a new id (`<type>_<12 random>`) and every pasted edge the id `edge_<12 random>` (not
-  the `xy-edge__…` form). The data is copied as it is, including any open-panel flags, so a pasted Start Flow keeps
-  the same label. The clipboard lives inside one canvas: you cannot copy from one `.flow` and paste into another.
+  the `xy-edge__…` form). The data is copied as it is (old `open` keys included), so a pasted Start Flow keeps the same
+  label. The clipboard lives inside one canvas: you cannot copy from one `.flow` and paste into another.
 - Copy, paste, delete, undo, redo and F9 are ignored while the cursor is in a form field (the field's own text undo
   works there). Ctrl / Cmd + S works everywhere.
 - **Undo / redo is VS Code's document history.** Every canvas change is one whole-document edit, so one undo reverts
-  exactly one change (a form Save, a drop, a connect, a move, a panel opened or closed, a rotate …) and the canvas
-  reloads the result.
+  exactly one change (a form Save, a drop, a connect, a move, a rotate …) and the canvas reloads the result; an open
+  form shows the reloaded values. Opening or closing a panel is not a change.
 
 ## Saving and the file
 
 **When the document changes.** These write the whole document at once (the file is then *modified*, not saved): a
-node dropped, pasted or deleted, an edge drawn or deleted, a move finished, a form saved, a rotate, a panel opened or
-closed. These do **not** touch the file: selection, pan and zoom, showing / hiding the palette, breakpoints, the
-theme.
+node dropped, pasted or deleted, an edge drawn or deleted, a move finished, a form saved, a rotate. These do **not**
+touch the file: opening or closing a node's panel, selection, pan and zoom, showing / hiding the palette,
+breakpoints, the theme.
 
 **When the disk changes.** Only on save: **Ctrl / Cmd + S** on the canvas, or VS Code's own Save. The Problems panel
 re-checks the project when a `.flow` changes on disk, so wiring problems appear after a save, not while editing.
@@ -216,14 +224,15 @@ JSON.stringify({ nodes, edges }, null, 2) + "\n"
   canvas change**.
 - **Each node:** exactly `id`, `type`, `position`, `data`, `dragHandle` (the last only when the node has one). Any other
   key on the node object is dropped. **`data` is kept whole** — unknown keys inside `data` or `data.settings`
-  survive, because every form merges into the existing settings (e.g. an LLM's `agentResponse` /
+  survive, because every form writes only its own keys onto the existing data (e.g. an LLM's `agentResponse` /
   `agentResponseProperty`, which have no field, stay).
 - **Each edge:** kept whole except `selected` and `style`, which are removed. Unknown keys on an edge stay.
 - **Ids are never changed** by the canvas, except for pasted copies.
 - **Positions** are written as the card stands. Dragging snaps to 16; a position from the file is never snapped until
   the card is moved.
 - **Canvas-only data the engine ignores**, all inside `data`: `labelNode`, `descriptionNode`, `label` (on most nodes),
-  `description`, `open`, `openLLM`, `openPrompt`, `handlePosition`, `llm.modelId`, plus `position` and `dragHandle`.
+  `description`, `handlePosition`, `llm.modelId`, plus `position` and `dragHandle`. (`open`, `openLLM`, `openPrompt`
+  from older files are kept but no longer written or read.)
   The canvas does not write breakpoints, the palette state or the pan / zoom into the file.
 - Nothing is re-ordered or re-formatted beyond that: 2-space indent, the keys in the order the objects have them, a
   final newline.
@@ -234,9 +243,10 @@ Code loads into the document, an undo or redo — is **pushed into the canvas, w
 reload does not write anything back. After a reload:
 
 - the nodes, edges, positions and data on screen are the new file's;
-- **open node forms still hold their old values** (*A node's form reads the node's data once*, above): if the person
-  edits and saves a form of a node you changed, your change to that form's fields is overwritten. After rewriting a
-  file the person has open, ask them to close the tab and open the file again before they edit nodes;
+- **open node forms show the new values** (*A form always shows the node's current data*, above) — a value you wrote
+  replaces what the form showed, including any unsaved typing in the fields you changed;
+- if the new text is not a valid `.flow`, the canvas switches to the error state (next section); a valid text pushed
+  in later draws the flow again;
 - **breakpoints** stay keyed by node id: a node you gave a new id loses its breakpoint (it is dropped for good the next
   time the extension starts);
 - if the person had **unsaved canvas changes**, your write and theirs collide in VS Code's document — see *Could not
@@ -244,19 +254,48 @@ reload does not write anything back. After a reload:
 
 ## What a hand-written `.flow` needs to open cleanly
 
-The canvas validates nothing when it opens a file, fills nothing in and strips nothing. What it needs:
+The canvas checks the file's **shape** when it opens it and on every outside change. It fills nothing in and strips
+nothing.
+
+**A file that fails the check opens as an error state, not as a flow.** The screen shows the title "This .flow file
+cannot be opened on the canvas", **every** reason as a list, and the line "Fix the file in the text editor (Reopen
+Editor With… → Text Editor). Nothing here changes the file; the canvas opens it as soon as it is valid." No canvas is
+drawn, so nothing can be edited, and nothing is written into the file (paste and F9 do nothing; Ctrl / Cmd + S, undo
+and redo still reach VS Code — none of them writes the canvas into the file). When the text becomes valid (an edit in
+the text editor, a rewrite on disk), the canvas draws it at once.
+
+**Empty text** (or only whitespace) is not an error: it opens as a new, empty flow.
+
+The reasons, word for word (node and edge numbers count from 1, in file order):
+
+| The file has | The reason shown |
+|---|---|
+| text that is not JSON (a trailing comma, a comment) | `the file is not valid JSON: <the parser's message>` |
+| a top level that is not an object | `the top level must be an object with "nodes" and "edges" lists` |
+| no `nodes` list / no `edges` list | `"nodes" must be a list` / `"edges" must be a list` |
+| a node that is not an object | `node #<n> is not an object` |
+| a node without a non-empty string `id` | `node #<n> has no id` |
+| a node id used twice in the file | `node #<n>: <id> — the node id is used twice in this file` |
+| a node without a non-empty string `type` | `node #<n> (<id>) has no type` |
+| a node without `position` `{ "x": <number>, "y": <number> }` | `node #<n> (<id>) has no position {"x": <number>, "y": <number>}` |
+| a node without a `data` object | `node #<n> (<id>) has no "data" object` |
+| an edge that is not an object | `edge #<n> is not an object` |
+| an edge without a non-empty string `id` | `edge #<n> has no id` |
+| an edge without a `source` and a `target` | `edge #<n> needs a "source" and a "target" node id` |
+
+What a file that passes still needs, to look and behave right:
 
 | Part | What the canvas does with it |
 |---|---|
-| The file | Must be a JSON object. Empty text, invalid JSON (a trailing comma, a comment), or `nodes` / `edges` that are not arrays → the canvas shows an **empty** flow (a missing array alone becomes `[]`). **Any change made on that empty canvas replaces the whole file** with the new flow — the broken content is lost. |
-| `id` | Used as it is: the card's identity, the edges' ends, the breakpoint key. Not checked, not regenerated. Keep it `<type>_` + 12 letters / digits and unique in the project — the engine and the deploy depend on it (`../Flow/Nodes/SKILL.md`). |
-| `type` | Must be one of the 15 canvas types (`canvas-nodes.md`). Any other value is drawn as a plain default box with no form. |
-| `position` | `{ "x": <number>, "y": <number> }`; the canvas does not supply one. Use multiples of 16 so the card lines up with the grid. |
+| `id` | Used as it is: the card's identity, the edges' ends, the breakpoint key. Not regenerated. Keep it `<type>_` + 12 letters / digits and unique in the project — the engine and the deploy depend on it (`../Flow/Nodes/SKILL.md`). |
+| `type` | One of the 15 canvas types (`canvas-nodes.md`). Any other string passes the check but is drawn as a plain default box with no form. |
+| `position` | Use multiples of 16 so the card lines up with the grid. |
 | `data.labelNode`, `data.descriptionNode` | The card's head title and footer. Missing → an empty head / footer. Write the palette's texts (`canvas-nodes.md`). |
 | `data.*` fields | The card body and each form read **specific keys** — put each value where that node's form reads it, or the card is blank and the form opens empty (e.g. the Start, End, Script, Assignment and Note forms read their Label from `data.label`, not `data.settings.label`). The key map per node is in `canvas-nodes.md`. |
-| `data.open`, `openLLM`, `openPrompt` | `true` opens that panel on load. Write `false` or leave them out. |
+| `data.open`, `openLLM`, `openPrompt` | Not read and not written: every panel opens closed. Ones already in a file are kept as they are. Leave them out of new files. |
 | `dragHandle` | `".drag-handle__custom"` → the card drags by its head only. Missing → the card drags from anywhere on it (still saved without the key). |
-| An edge | Needs `source`, `target`, `sourceHandle`, `targetHandle` that exist. An edge to a missing node or a handle id the node does not have (wrong case, an engine key such as `next_2` on a Condition) is **not drawn** but is **kept** and written back on every save. An edge without `"type": "step"` is still drawn as a step line. |
+| An edge | Its `source`, `target`, `sourceHandle`, `targetHandle` should exist. An edge to a missing node or a handle id the node does not have (wrong case, an engine key such as `next_2` on a Condition) passes the check but is **not drawn**; it is **kept** and written back on every save. An edge without `"type": "step"` is still drawn as a step line. |
+| A form field's value | Loaded into the form as it is, even when the form would refuse it; only that form's next Save is refused until it is fixed. The limits and shapes per field are in `canvas-nodes.md`. |
 | Unknown keys | Inside `data`: kept for ever. On the node object or the top level: dropped at the first canvas change. |
 
 **Duplicate ids across files.** When a **new** `.flow` appears in the workspace (an Explorer copy, a `cp`, a file you
@@ -296,16 +335,15 @@ Only the canvas side; starting and driving the debugger is `debugging.md`.
 
 | Mistake | What happens | Do instead |
 |---|---|---|
-| Rewriting a `.flow` the person has open and is editing | their unsaved canvas edits and your write collide; open forms keep old values and can overwrite your change on their next Save | rewrite only closed or saved, untouched files; afterwards ask them to reopen the tab |
-| Writing invalid JSON (comment, trailing comma) | the canvas shows an empty flow; the person's first touch replaces the file | `JSON.parse` your output before writing |
+| Rewriting a `.flow` the person has open and is editing | their unsaved canvas edits and your write collide in VS Code's document; open forms switch to your values and drop what they were typing in those fields | rewrite only closed or saved, untouched files |
+| Writing invalid JSON (comment, trailing comma), or a node without `type` / `position` / `data` | the canvas shows the error state with the reasons; the person cannot use the canvas until the file is fixed | `JSON.parse` your output and give every node `id`, `type`, `position`, `data` before writing |
 | Extra top-level keys or extra keys on a node object | silently dropped on the first canvas change | keep top level `nodes` / `edges`; put node extras inside `data` (only if the engine reads them there) |
 | An edge whose handle id is not the node's canvas id (`next_1` on a Start, `next_2` on a Condition, `In` for `in`) | the edge is invisible on the canvas but stays in the file | the canvas ids in `canvas-nodes.md` |
 | Two edges from one output, two into a single-input `in`, Summary into a non-Summarizer | loaded and kept; a person could never draw it, and the run or deploy does not do what you meant | the rules in *Connecting* |
 | A value in a key the form does not read (e.g. a Start label only in `settings.label`) | the card is blank and the form opens empty; a Save then writes the empty value | the key map in `canvas-nodes.md` |
-| `"open": true` left in a node | the panel is open every time the file opens | write `false` or omit |
 | Changing a node's id in a rewrite | its breakpoint is lost | keep ids stable |
 | Copying a node's id into a new file | the extension renumbers the whole new file | fresh 12-character ids |
-| An LLM / Summarizer dropped but its model menu never saved | no `settings.llm` in the file — the default model the menu shows is not saved until a person changes it | write `settings.llm` (see `canvas-nodes.md`) |
+| An LLM / Summarizer dropped but its model menu never saved | no `settings.llm` in the file; the menu says "No model saved yet" and the model it shows is not in the file | write `settings.llm` (see `canvas-nodes.md`) |
 
 ## Example — building a small flow on the canvas
 
@@ -341,7 +379,6 @@ The file (ids and the prompt id are illustrative; key order may differ):
         "description": "",
         "labelNode": "Start Flow",
         "descriptionNode": "Flow entry point",
-        "open": false,
         "settings": { "value": "Start", "label": "Start" }
       },
       "dragHandle": ".drag-handle__custom"
@@ -355,7 +392,6 @@ The file (ids and the prompt id are illustrative; key order may differ):
         "description": "",
         "labelNode": "Script",
         "descriptionNode": "Execute custom JS script",
-        "open": false,
         "settings": {
           "value": "lookupOrder.js",
           "label": "Lookup order",
@@ -372,9 +408,7 @@ The file (ids and the prompt id are illustrative; key order may differ):
         "label": "",
         "labelNode": "LLM",
         "descriptionNode": "Use LLM processor",
-        "open": false,
-        "openLLM": false,
-        "openPrompt": false,
+        "description": "",
         "settings": {
           "sessionId": "",
           "requestId": "",
@@ -420,8 +454,9 @@ What the example shows:
 
 - `effort: 2` is the **index** of `high` in that model's options (`low`, `medium`, `high`); `top_p` is absent because
   this model's Temperature and Top p are a "select one" pair.
-- The LLM has **no `description`**: General settings saved `""`, then Prompt settings wrote back the description the
-  card had when it was drawn (none). The End Flow, never opened, has no `open` and no `settings`.
+- The LLM keeps the `"description": ""` its General settings saved: the LLM settings and Prompt settings Saves
+  write only `settings.llm` / `settings.specialRules` and `settings.prompts`. No node has an `open` key — opening and
+  closing the panels wrote nothing. The End Flow, never opened, has no `settings`.
 - Entry for the agent: Start Flow `Orders`, Start Node `Start` (`../Flow/Nodes/StartFlow/start-flow-skill.md`). Run
   `keen-validate` before deploying.
 
@@ -429,6 +464,4 @@ What the example shows:
 
 - What VS Code does when the `.flow` changes on disk while the document has **unsaved** canvas changes (VS Code's own
   dirty-file conflict handling; not in the extension's code), and whether `files.autoSave` saves canvas changes.
-- The exact on-screen effect of a node without `position` (the canvas supplies none) and of two nodes with the same id
-  in one file.
 - The exact key order of a newly drawn edge object.

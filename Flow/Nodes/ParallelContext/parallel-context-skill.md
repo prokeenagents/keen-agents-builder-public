@@ -54,8 +54,8 @@ A failure **inside one run** follows the rules of the node that failed (see its 
 | Assign result to dictionary property | `data.settings.assignTo` | required by the canvas form (1–80) | **not read by the engine**. Results land in the list itself. Write a name such as `"products"` to keep the form valid |
 | Description | `data.description` | ≤ 250 | a note; not read by the engine |
 
-Write `contextCollection` bare (`dictionary.products`). The engine would also take `${dictionary.products}`, but the
-canvas form refuses it.
+Write `contextCollection` bare (`dictionary.products`). The engine also takes `${dictionary.products}`, and so does the
+canvas form; keen-validate accepts both.
 
 ## Rotate
 
@@ -73,7 +73,7 @@ opposite side. The key is absent until someone rotates the node. Cosmetic only. 
 | `data.description` | no | ≤ 250, a note. Not read by the engine. |
 | `data.labelNode` | yes, `"Parallel Context"` | fixed title; anything else → keen-validate error |
 | `data.descriptionNode` | yes, `"Point to the single flow that must be awaited with predefined context"` | fixed subtitle; anything else → keen-validate error |
-| `data.open` | no (write `false`) | settings panel open on the canvas. Not read by the engine. |
+| `data.open` | no — leave it out | the canvas no longer reads or writes it (every panel opens closed; one already in a file is kept). Not read by the engine. |
 | `data.handlePosition` | no | see *Rotate*. Leave it out. |
 | `data.settings.contextCollection` | **yes** | the list — read by the engine. Missing → error; not starting with `dictionary.` → error. |
 | `data.settings.pipe` | **yes** | the target flow — read by the engine as a literal. Missing → error; not a File-Label → error; a File-Label no flow's Start defines → error (*does not resolve to any flow's Start*). |

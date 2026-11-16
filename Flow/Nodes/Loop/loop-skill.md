@@ -77,7 +77,7 @@ Finish silently and writes nothing into Set to.
 
 | Field (canvas) | JSON key | Rule | What it is for |
 |---|---|---|---|
-| Read from | `data.settings.value` | required; ≤ 120 (the form's schema; its input box stops typing at 60, so stay ≤ 60); must start `dictionary.` or `session.` | **which key** holds the list |
+| Read from | `data.settings.value` | required; ≤ 120 (the canvas input box takes exactly that); must start `dictionary.` or `session.` | **which key** holds the list |
 | Set to | `data.settings.setto` | same rules; must differ from Read from | **which key** receives the current element on each pass |
 | Description | `data.description` | ≤ 250 | a note; not read by the engine |
 
@@ -88,8 +88,9 @@ evaluated. A dictionary path may be nested (`dictionary.order.lines`) and walks 
 
 The prefix rule differs between the three checks:
 
-- **The canvas form** accepts any text and only checks the required, ≤ 120 and "must differ" rules. A bare
-  `items` saves fine on the canvas.
+- **The canvas form** checks the engine's own rule on both fields: `dictionary.<path>` or `session.<key>` with
+  something after the dot, optionally wrapped whole in `${…}`. A bare `items` is refused with
+  'Read from must start with "dictionary." or "session." (e.g. dictionary.items)' (or the same words for Set to).
 - **The engine** throws on a bare name. The run stops (see *Error*).
 - **keen-validate** errors on an empty field, on a field that does not match
   `^(\$\{)?(dictionary|session)\..+`, and on Read from = Set to. A half wrapper such as `${dictionary.items`
@@ -117,7 +118,7 @@ wiring or the run, so leave it out.
 | `data.description` | no | a note under the card, ≤ 250. Not read by the engine. |
 | `data.labelNode` | yes, `"Loop"` | the fixed title; anything else is a keen-validate error. Not read by the engine. |
 | `data.descriptionNode` | yes, `"Loop dictionary iterable segment"` | the fixed subtitle; anything else is a keen-validate error. Not read by the engine. |
-| `data.open` | no (write `false`) | whether the settings panel is open on the canvas. Not read by the engine. |
+| `data.open` | no — leave it out | the canvas no longer reads or writes it (every panel opens closed; one already in a file is kept). Not read by the engine. |
 | `data.handlePosition` | no | see *Rotate*. Leave it out. |
 | `data.settings.value` | **yes** | Read from, see *Settings*. Read by the engine. No `${…}` evaluation. Empty or unprefixed → a keen-validate error. |
 | `data.settings.setto` | **yes** | Set to, see *Settings*. Read by the engine. The same rules apply, and it must differ from `value` (keen-validate error). |

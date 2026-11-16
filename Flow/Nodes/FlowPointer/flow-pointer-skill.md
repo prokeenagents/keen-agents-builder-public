@@ -43,14 +43,15 @@ failing branch does to the others and to the run is in the Parallel Flows file (
 
 | Field (canvas) | JSON key | Rule | What it is for |
 |---|---|---|---|
-| Flow | `data.settings.value` | **required**; a `File-Label`: `/^[A-Z][a-zA-Z]*-[A-Z][a-zA-Z]*$/` (letters only, one dash); ≤ 120 in the form's schema, but its input box stops typing at 60, so stay ≤ 60; **no `${…}`** | the entry the branch starts at: `<FlowFileName>-<StartLabel>`, in any flow file of the project. The only property the engine reads |
+| Flow | `data.settings.value` | **required**; a `File-Label`: `/^[A-Z][a-zA-Z]*-[A-Z][a-zA-Z]*$/` (letters only, one dash); ≤ 120 (the canvas input box takes exactly that); a placeholder: the canvas form accepts one, keen-validate refuses it | the entry the branch starts at: `<FlowFileName>-<StartLabel>`, in any flow file of the project. The only property the engine reads |
 | (Flow, copy) | `data.settings.label` | same text as `value` | the canvas writes it; not read by the engine or deploy |
 | (Flow, copy) | `data.label` | same text as `value` | the card's title; not read |
 | Description | `data.description` | optional, ≤ 250 | a note under the card; not read |
 
 The engine would resolve a `${dictionary.…}` / `${session.…}` placeholder in `value` (against the caller's
-dictionary and session), but the canvas form and keen-validate reject one (the form refuses to Save; the file keeps
-what it had). Write a literal entry name.
+dictionary and session), and the canvas form accepts one (a whole placeholder, or placeholders mixed with letters and `-`; a half wrapper
+such as `${flow}` or `${dictionary.next` stays refused). keen-validate still refuses anything but a literal `File-Label`.
+Write a literal entry name.
 
 ## Rotate
 
@@ -69,7 +70,7 @@ wiring or the run. Leave it out.
 | `data.description` | no | a note, ≤ 250. Not read by the engine. |
 | `data.labelNode` | yes, `"Flow Pointer"` | fixed; anything else is a keen-validate error. Not read by the engine. |
 | `data.descriptionNode` | yes, `"Point to the flow that must be awaited"` | fixed; anything else is a keen-validate error. Not read by the engine. |
-| `data.open` | no (write `false`) | whether the settings panel is open. Not read by the engine. |
+| `data.open` | no — leave it out | the canvas no longer reads or writes it (every panel opens closed; one already in a file is kept). Not read by the engine. |
 | `data.handlePosition` | no | see *Rotate*. Leave it out. |
 | `data.settings.value` | **yes** | the target `File-Label`. Read by the engine when the Parallel Flows node runs. Missing or empty → keen-validate error; not a `File-Label` → error; no such Start in the project → error. |
 | `data.settings.label` | yes (write it) | the same text as `value`; written by the canvas. Not read. |
@@ -124,7 +125,7 @@ The complete pair — Parallel Flows, two Flow Pointers and all edges — is in 
 |---|---|---|
 | `next` wired to an LLM / Script / End Flow `in` | no error, nothing ever runs from it | `next` → a Parallel Flows `wait` |
 | no edge from `next` | the flow is never started; keen-validate warns | wire it into `wait` |
-| `"value": "${dictionary.flow}"` | keen-validate error; the canvas form refuses to save it | a literal `File-Label` |
+| `"value": "${dictionary.flow}"` | keen-validate error (the canvas form accepts it) | a literal `File-Label` |
 | `"value": "PriceAcme"` (no Start label) or `"priceacme-start"` | keen-validate error; at run time the branch is skipped | `"PriceAcme-Start"` — file name and Start label, exactly |
 | the target flow file has a digit (`Price2.flow`) | no `File-Label` can name it | letters-only file names |
 | renaming the target's Start label later | keen-validate error on the pointer; deployed, the branch silently stops running | change the pointer with it |

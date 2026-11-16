@@ -60,7 +60,7 @@ never changes the wiring. Do not write it unless a layout needs it.
 | `data.description` | no | a free note under the card (may be `""`). Not read by the engine. |
 | `data.labelNode` | fixed `"End Flow"` | the node kind's title on the canvas. Not read by the engine. |
 | `data.descriptionNode` | fixed `"Flow terminal"` | the node kind's subtitle. Not read by the engine. |
-| `data.open` | no (write `false`) | whether the card's settings panel is open on the canvas. Not read by the engine. |
+| `data.open` | no — leave it out | the canvas no longer reads or writes it (every panel opens closed; one already in a file is kept). Not read by the engine. |
 | `data.handlePosition` | no | `top` / `right` / `bottom` / `left`; absent until rotated (default `top`). See Rotate. Cosmetic. |
 | `data.settings.value` | yes (the label) | the Label text; same as `settings.label`. Not read by the engine. |
 | `data.settings.label` | yes (the label) | the Label text. Not read by the engine. |

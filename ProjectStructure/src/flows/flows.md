@@ -40,7 +40,7 @@ What goes in:
 | `<Name>.flow` files | yes, one or more | the flows; format in `project-flow.md` |
 | subfolders | **no** | the folder is a single level |
 | any other file (`.json`, `.js`, `.md`, `Orders.flow.json`, a backup) | **no** | only `.flow` files |
-| dot-files (`.DS_Store`) | avoid | keen-deploy never uploads them, but keen-validate reports them as stray files |
+| dot-files (`.DS_Store`) | avoid | keen-deploy and Shira 0.0.7 never upload them, but keen-validate reports them as stray files |
 
 One file may hold **several Start nodes**: each is its own entry, `<FileName>-<StartLabel>` (`Orders-Start`,
 `Orders-Refund`). The entry names of the whole project are listed at the end of every keen-validate report
@@ -83,6 +83,9 @@ the agent's main flow keeps the name the agent's record uses.
   **50 MB** (the platform's setting; larger uploads are refused).
 - Start Flow name as the agent's entry: 3–60 characters. Start Node (the label): 3–60 characters in the console,
   at most 60 in keen-validate.
+- Node ids must be unique across the whole project (all flows together): the deploy refuses a repeat, and Shira's
+  Problems panel shows it on both files first (`flows/<A>.flow: <id> — the node id is used again in flows/<B>.flow`,
+  `../../../ShiraFlowBuilder/problems.md`).
 - Entry names must be unique across the project: `Orders-Start` in two files is impossible (the file name differs),
   but two Start nodes with the same label in **one** file register one entry — the later node wins.
 

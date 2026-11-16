@@ -93,8 +93,10 @@ package or absolute path.
 
 Imports: the deploy accepts only relative imports and the engine's ten `system/*` modules — an npm package, an
 absolute path, any `node:*` or another `system/<word>` is refused (`Unauthorized import "<x>" - only relative (./, ../)
-imports and the engine's system/ modules (…) allowed`), the same rule the script-engine applies at run time. One gap
-remains, caught only by keen-validate:
+imports and the engine's system/ modules (…) allowed`), the same rule the script-engine applies at run time. Shira's
+Problems panel shows the same words as an error on the import's line before the deploy refuses it (only `import`
+declarations, as the deploy checks them — an `export … from 'node:fs'` passes both). One gap remains, caught only by
+keen-validate:
 
 - A relative import of a file that does not exist deploys, then fails the node when it runs.
 

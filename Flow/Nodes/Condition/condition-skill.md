@@ -45,7 +45,7 @@ Yes, one field:
 
 | Field | JSON key | Rule | What it is for |
 |---|---|---|---|
-| Condition | `data.settings.value` | required, ≤ 150 characters (the form's rule; the canvas input box stops typing at 60); placeholders `${dictionary.…}` / `${session.…}` | the expression the engine evaluates |
+| Condition | `data.settings.value` | required, ≤ 150 characters (the form's rule; the canvas input box takes exactly that); placeholders `${dictionary.…}` / `${session.…}` | the expression the engine evaluates |
 
 The other `data` fields are not settings: `data.label` repeats the expression as the card's title (no effect on
 running), `data.description` is an optional note (≤ 250), and `data.labelNode` / `data.descriptionNode` are
@@ -68,7 +68,7 @@ or the run. Leave it out when you write the node.
 | `data.description` | no | a note under the card, ≤ 250 (the canvas form's cap). Not read by the engine. |
 | `data.labelNode` | yes, `"Condition"` | the fixed title of this kind; anything else is a keen-validate error. Not read by the engine. |
 | `data.descriptionNode` | yes, `"Set condition flow direction"` | the fixed subtitle; anything else is a keen-validate error. Not read by the engine. |
-| `data.open` | no (write `false`) | whether the settings panel is open on the canvas. Not read by the engine. |
+| `data.open` | no — leave it out | the canvas no longer reads or writes it (every panel opens closed; one already in a file is kept). Not read by the engine. |
 | `data.handlePosition` | no | see *Rotate*. Leave it out. |
 | `data.settings.value` | **yes** | the expression — see *Settings* and *How the engine runs it*. The only property the engine reads. Missing or empty → keen-validate error. |
 | `dragHandle` | yes, `".drag-handle__custom"` | the canvas's drag handle. Anything else → a keen-validate warning. Not read by the engine. |

@@ -6,8 +6,8 @@ The agent's source code: the flows, the scripts and the tool registry. Only this
 everything outside it stays on your machine.
 
 Who reads it:
-- **Shira** checks it for its Problems panel, zips the whole folder on Upload, and re-uploads it on every change while
-  connected.
+- **Shira** checks it for its Problems panel, zips `flows/`, `scripts/` and `keen-tools.json` on Upload (keen-deploy's
+  rule), and re-uploads them on every change to them while connected — not while the Problems panel has an error.
 - **keen-validate** checks the flows, the scripts and `keen-tools.json`.
 - **keen-deploy** zips only `flows/`, `scripts/` and `keen-tools.json`.
 - **The deploy service** builds the upload, checks its structure, scans every `.js` file and then makes it live.
@@ -35,9 +35,11 @@ build output inside `src/`. A service's skill lives at `<project>/.claude/skills
 outside `src/` (`../../Services/service-skill-template.md`).
 
 What happens on deploy:
-- **Shira** uploads **every file under `src/`**, including dot-files and `node_modules/` if they are there.
-- **keen-deploy** uploads only `flows/`, `scripts/` and `keen-tools.json`. It skips dot-entries, `node_modules` and
-  `*.zip` at any depth, and names any other top-level entry it left out in `skipped`.
+- **Shira** and **keen-deploy** upload the same: only `flows/`, `scripts/` and `keen-tools.json`. They skip
+  dot-entries, `node_modules` and `*.zip` at any depth (Shira also never follows a symbolic link), and name any other
+  top-level entry they left out — keen-deploy in `skipped`, Shira in **Output → Flow Builder** (`not sent (the platform
+  builds only flows/, scripts/ and keen-tools.json): …`). (Shira 0.0.6 uploaded every file under `src/`, dot-files and
+  `node_modules/` included.)
 - **The deploy service** compiles each `.flow` into the engine's form and removes the raw file. It turns
   `keen-tools.json` into the tool map and removes it, and it adds its own `scripts/debux.js`, overwriting any copy you
   shipped. Then it scans **every `.js` file** in the upload. Other files are kept in the live tree but nothing uses them.
@@ -59,6 +61,12 @@ What happens on deploy:
   - error: `The flows directory must contain at least one [FILE_NAME].flow file for the project to be valid.`
   - warning: `Directories are not allowed in src/flows — only top-level *.flow files.`
   - warning: `File does not belong to the project structure (expected *.js).` (and the same with `*.flow` for `flows/`)
+  - error, in the deploy's own words, before an upload is refused: a `.flow` that is not JSON or not the `.flow` shape
+    (`flows/<file>: invalid JSON — …`, `flows/<file>: "nodes" must be a list`, …), a node id used twice anywhere in
+    the project (`flows/<A>.flow: <id> — the node id is used again in flows/<B>.flow`, on both files), a
+    `keen-tools.json` that is not `{ "tools": [ … ] }` (`keen-tools.json: "tools" must be a list of tool objects`), and
+    an import that is not relative or one of the ten `system/*` modules (`Unauthorized import "<x>" - …`) —
+    `../../ShiraFlowBuilder/problems.md`.
 - Note that Shira's script-name rule refuses `_` and `-`, so the tree's `tools/web_search_tool.js` is an error in Shira (no
   other tool checks script names). (house standard) Name it `tools/webSearchTool.js`.
 - (house standard — not checked by any tool yet) Tools live under `scripts/tools/`, and each one imports its service as
@@ -68,7 +76,9 @@ What happens on deploy:
 
 ## Security
 
-No secrets in `src/`. Everything here is uploaded, kept on the platform and readable by anyone with the code. App
+No secrets in `src/`. Everything in `flows/`, `scripts/` and `keen-tools.json` is uploaded, kept on the platform and
+readable by anyone with the code; anything else in `src/` (a `.env`) is not uploaded but does not belong beside the
+code either. App
 credentials go in the agent's **Secrets** (read with `system/secrets`), plain config goes in the agent's **Json
 settings** (`system/settings`), and the deploy token stays in `.vscode/keen.json`.
 
@@ -80,7 +90,7 @@ settings** (`system/settings`), and the deploy token stays in `.vscode/keen.json
 | `flows/notes.md` | The deploy is refused (`` `flows` must contain only .js files ``) | Keep notes outside `src/` |
 | `scripts/tools/web_search_tool.js` | Shira shows an error and disables Upload | `scripts/tools/webSearchTool.js` |
 | `import x from '../services/webSearch/service'` | The run fails, because the import has no extension | `'../services/webSearch/service.js'` |
-| `npm install` inside `src/` | Shira uploads `node_modules/` and the scan refuses its `require()` | No packages; import only `system/*` and relative files |
+| `npm install` inside `src/` | `node_modules/` is not uploaded (Shira 0.0.6 uploaded it and the scan refused its `require()`), and an import of a package is refused | No packages; import only `system/*` and relative files |
 | A secret in `services/<s>/settings.js` | It is deployed, readable and exported | The agent's Secrets, read in the tool |
 
 ## Example

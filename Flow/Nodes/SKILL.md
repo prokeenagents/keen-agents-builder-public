@@ -10,9 +10,11 @@ description: Keen 15.3 — How to write the nodes and edges of a Keen agent flow
 
 A Keen agent runs a **flow**: a graph of **nodes** wired by **edges**, saved as JSON in `src/flows/<FlowName>.flow`.
 A person draws it on a canvas; you write the same file by hand. The file you save must be one the canvas would
-have saved, because `keen-validate` checks the canvas rules as well as the engine rules. The canvas itself checks
-nothing when it opens a file: an edge it cannot draw stays in the file unseen, and a value its form would refuse stays
-until a person opens that form and fixes it. What the canvas reads and writes: `../../ShiraFlowBuilder/canvas.md`.
+have saved, because `keen-validate` checks the canvas rules as well as the engine rules. When it opens a file the canvas
+checks only its shape — a file that is not JSON, or a node without `id`, `type`, `position` or `data`, opens as an error
+screen with the reasons, never as a flow. Past that it checks nothing: an edge it cannot draw stays in the file unseen,
+and a value its form would refuse stays until a person opens that form and fixes it. What the canvas reads and writes:
+`../../ShiraFlowBuilder/canvas.md`.
 
 This file is the map. Every node has its own file next to this one with the exact JSON, settings, engine
 behaviour and mistakes. **Before you write or change a node, read its file** — the details there (handle ids,

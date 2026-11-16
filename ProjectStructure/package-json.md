@@ -48,7 +48,7 @@ No secrets. The file is committed. Never put a token or a password in a script l
 
 | Mistake | What happens | Write instead |
 |---|---|---|
-| The file is moved into `src/` | Shira no longer detects the project. Shira's Upload would also send it | Keep it in the project root |
+| The file is moved into `src/` | Shira no longer detects the project (Shira 0.0.7 would not upload a `src/package.json`; 0.0.6 did) | Keep it in the project root |
 | `"dependencies": { "axios": "…" }` and `import axios from 'axios'` | keen-validate errors, and the deploy scan refuses the import (`Unauthorized import "axios" …`) | `import Http from 'system/http'` |
 | `"type": "commonjs"` or no `type` | The editor and Node read `export` as an error locally (the platform is unchanged) | `"type": "module"` |
 | `"name": "My Agent"` | npm refuses the name when you install Prettier | `"name": "my-agent"` |

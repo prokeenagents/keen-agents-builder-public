@@ -109,7 +109,7 @@ running.
 | `data.description` | no | ≤ 250, a note; not read by the engine |
 | `data.labelNode` | `"Script"` | fixed card title |
 | `data.descriptionNode` | `"Execute custom JS script"` | fixed card subtitle |
-| `data.open` | no | the canvas settings panel is open; not read by the engine |
+| `data.open` | no — leave it out | the canvas no longer reads or writes it (every panel opens closed; one already in a file is kept). Not read by the engine. |
 | `data.handlePosition` | no | `top` / `right` / `bottom` / `left`, see Rotate; not read by the engine |
 | `data.settings.value` | yes | the script path — see Settings; read as a literal |
 | `data.settings.label` | no | the label the card shows; not read by the engine |

@@ -55,7 +55,7 @@ until someone rotates the node. Cosmetic. Leave it out.
 | `data.labelNode` | yes, `"Join Flow"` | fixed title; anything else is a keen-validate error. Not read by the engine. |
 | `data.descriptionNode` | yes, `"Common merge point"` | fixed subtitle; anything else is a keen-validate error. Not read by the engine. |
 | `data.handlePosition` | no | see *Rotate*. Leave it out. |
-| `data.settings`, `data.open`, `data.description` | no, leave out | a Join has no settings and no settings panel; the canvas does not write them. |
+| `data.settings`, `data.open`, `data.description` | no, leave out | a Join has no settings and no settings panel; the canvas does not write them (and never reads `open`). |
 | `dragHandle` | yes, `".drag-handle__custom"` | the canvas's drag handle; anything else → warning. Not read by the engine. |
 
 ## In the `.flow` file

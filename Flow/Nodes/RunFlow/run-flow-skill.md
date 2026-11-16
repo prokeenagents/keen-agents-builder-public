@@ -58,11 +58,11 @@ Yes, one field:
 
 | Field | JSON key | Rule | What it is for |
 |---|---|---|---|
-| Flow | `data.settings.value` | required; a literal `File-Label` (`/^[A-Z][a-zA-Z]*-[A-Z][a-zA-Z]*$/`, ≤ 120 — the canvas form's cap); **no `${…}`** | the entry to call: `<FlowFileName>-<StartLabel>`, e.g. `Lookup-Start` for the Start labelled `Start` in `Lookup.flow`; any file of the project, the caller's own included |
+| Flow | `data.settings.value` | required; a literal `File-Label` (`/^[A-Z][a-zA-Z]*-[A-Z][a-zA-Z]*$/`, ≤ 120 — the canvas form's cap); a placeholder: the canvas form accepts one, keen-validate refuses it | the entry to call: `<FlowFileName>-<StartLabel>`, e.g. `Lookup-Start` for the Start labelled `Start` in `Lookup.flow`; any file of the project, the caller's own included |
 
-The engine would resolve `${dictionary.…}` / `${session.…}` in this field, but the canvas form and
-keen-validate refuse anything that is not a literal `File-Label`, and the canvas drops a placeholder the next
-time the node is saved. Write a literal; to choose between flows at run time, put a **Condition** in front of
+The engine resolves `${dictionary.…}` / `${session.…}` in this field, and the canvas form accepts one (a whole
+placeholder, or placeholders mixed with letters and `-`; a half wrapper such as `${flow}` or `${dictionary.next`
+stays refused). keen-validate still refuses anything that is not a literal `File-Label`. Write a literal; to choose between flows at run time, put a **Condition** in front of
 two Run Flows.
 
 `data.description` is an optional note (≤ 250, the canvas form's cap). `data.label` is not a setting: the
@@ -85,7 +85,7 @@ never changes the wiring or the run. Leave it out.
 | `data.description` | no | a note under the card, ≤ 250. Not read by the engine. |
 | `data.labelNode` | yes, `"Run Flow"` | fixed title; anything else is a keen-validate error. Not read by the engine. |
 | `data.descriptionNode` | yes, `"Execute Flow in this context and return"` | fixed subtitle; anything else is a keen-validate error. Not read by the engine. |
-| `data.open` | no (write `false`) | whether the settings panel is open on the canvas. Not read by the engine. |
+| `data.open` | no — leave it out | the canvas no longer reads or writes it (every panel opens closed; one already in a file is kept). Not read by the engine. |
 | `data.handlePosition` | no | see *Rotate*. Leave it out. |
 | `data.settings.value` | **yes** | the target `File-Label` — the only property the engine reads. Missing / empty → keen-validate error; not a `File-Label` (a digit, `${…}`, lowercase, no dash) → error; a `File-Label` that matches no Start in the project → error that lists the known entries. |
 | `dragHandle` | yes, `".drag-handle__custom"` | the canvas's drag handle. Anything else → a keen-validate warning. Not read by the engine. |
@@ -153,7 +153,7 @@ until the person cancels.
 |---|---|---|
 | target `Lookup` or `lookup-start` | keen-validate error; at run time E2201 | `Lookup-Start` (`<FileName>-<StartLabel>`) |
 | target names a Start that does not exist, or a renamed Start | keen-validate error; at run time E2201 "Agent project error", final | the exact file name and Start label |
-| target `${dictionary.flowName}` | keen-validate error; the canvas form refuses to save it | a Condition in front of two literal Run Flows |
+| target `${dictionary.flowName}` | keen-validate error (the canvas form accepts it) | a Condition in front of two literal Run Flows |
 | a flow file with a digit (`Report2.flow`) | no `File-Label` can name it | letters-only file names |
 | `next` or `out` as the source handle | keen-validate rejects it | `next_1` |
 | expecting the sub-flow to work on a copy | it writes the caller's dictionary; same keys get overwritten | distinct key names, or Parallel Context for a private copy |

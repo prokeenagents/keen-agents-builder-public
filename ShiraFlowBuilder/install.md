@@ -1,6 +1,6 @@
 # Installing Shira Flow Builder
 
-> **Keen 15.3 · Shira Flow Builder 0.0.6.**
+> **Keen 15.3 · Shira Flow Builder 0.0.7.**
 
 ## What it is
 
@@ -18,17 +18,18 @@ It also writes its own checks to the **Problems** panel (`problems.md`), a **Con
 status bar, short "File … was saved" notices, and an output channel named **Flow Builder**.
 
 The canvas is bundled inside the `.vsix` (`media/builder/`): nothing else runs on the person's machine — no dev
-server, no Node.js install, no npm. The extension's own runtime dependencies (`ws`, `jszip`) are inside the `.vsix` too.
+server, no Node.js install, no npm. The extension's own runtime dependencies (`ws`, `jszip`, `acorn`) are inside the `.vsix` too.
 
 ## What the person does
 
 1. **Get the file.** The organisation console's Home page, card **Get started → Shira Flow Builder**, button
-   **Download Ext** (hint: "Download the Shira Flow Builder extension"; the card says "Use version 0.0.6 or newer —
-   the two-step sign-in and the debuggers need it."). The file is `shira-flow-builder-vs-0.0.6.vsix`.
+   **Download Ext** (hint: "Download the Shira Flow Builder extension"; the card says "Use version 0.0.7 or newer —
+   the two-step sign-in and the debuggers need it."). The file is `shira-flow-builder-vs-0.0.7.vsix`, served from the
+   extension's build repository.
 2. **Check VS Code.** The extension requires VS Code **1.90.0 or newer** (`engines.vscode` `^1.90.0`). **Help →
    About** shows the version.
 3. **Install it.** In VS Code: Extensions view → the **⋯** menu at the top → **Install from VSIX…** → pick the file.
-   (From a terminal the same is `code --install-extension shira-flow-builder-vs-0.0.6.vsix`.)
+   (From a terminal the same is `code --install-extension shira-flow-builder-vs-0.0.7.vsix`.)
 4. **Open the project folder** (**File → Open Folder…**). The extension works on the **first** folder of the window
    only — open the project itself, not a parent folder and not a multi-root workspace with the project second.
 5. Click the **Shira Flow Builder** icon in the activity bar.
@@ -60,7 +61,9 @@ asks (**Developer: Reload Window**). What survives and what does not:
 | The settings `flowBuilder.theme` / `flowBuilder.aiModels` | A running debug session |
 
 An extension older than 0.0.6 cannot answer the two-step sign-in code, so it cannot debug for an account that has
-two-step sign-in (and debugging needs it — `debugging.md`).
+two-step sign-in (and debugging needs it — `debugging.md`). 0.0.6 still debugs, but it uploads everything under
+`src/` (a `.env` too), keeps auto-syncing a project with errors, shows `MFA required!` as a missing permission, and its
+Create Project overwrites a filled-in `.vscode/keen.json` — move the person to 0.0.7.
 
 ## What you (the builder) can do yourself
 
@@ -83,7 +86,8 @@ two-step sign-in (and debugging needs it — `debugging.md`).
 |---|---|---|
 | VS Code older than 1.90 | The `.vsix` refuses to install | Update VS Code |
 | A parent folder (or a multi-root workspace) opened | The panel says `This folder is not a Shira Flow Builder project.`; Connect stays off | Open the project folder itself |
-| An older `.vsix` (before 0.0.6) on an account with two-step sign-in | The debuggers cannot sign in | Install 0.0.6 |
+| An older `.vsix` (before 0.0.6) on an account with two-step sign-in | The debuggers cannot sign in | Install 0.0.7 |
+| Staying on 0.0.6 | Uploads every file under `src/`, syncs a project with errors, hides the real debugger refusal | Install 0.0.7 |
 | Expecting the connection to survive a reload / update | Saves stay local; `Not connected` in the status bar | **Connect** again after every reload |
 
 ## Example

@@ -1,6 +1,6 @@
 # Keen skills — Keen 15.3
 
-The Keen agent builder's skills as one installable skill (`keen-skills`). Built 2026-11-16 from KeenAgentsBuilder.
+The Keen agent builder's skills as one installable skill (`keen-skills`). Built 2026-11-17 from KeenAgentsBuilder.
 
 ## Install (Claude Code)
 
@@ -22,7 +22,7 @@ Then put `keen-validate` and `keen-deploy` for your system on the PATH (`MCP/val
 | `keen-agent-architectures` | [`AgentArchitecture/SKILL.md`](AgentArchitecture/SKILL.md) | routing, prompt chaining, parallelization, evaluator-optimizer, orchestrator-worker; how flows pass information |
 | `keen-services` | [`Services/SKILL.md`](Services/SKILL.md) | making a service: connecting an agent to an external API in the house standard (service / connector / utils / settings, the tool, the service's own skill), with a validated example |
 | `keen-mcp` | [`MCP/SKILL.md`](MCP/SKILL.md) | the MCP server, the golden path, `keen-validate`, `keen-deploy`, testing with the runner (`bin/`, `agent-runner/`) |
-| `shira-flow-builder` | [`ShiraFlowBuilder/SKILL.md`](ShiraFlowBuilder/SKILL.md) | the Shira Flow Builder 0.0.6 VS Code extension: install, project and `keen.json`, the panel, the Problems checks, upload and auto-sync, the `.flow` canvas node by node, the flow and script debuggers |
+| `shira-flow-builder` | [`ShiraFlowBuilder/SKILL.md`](ShiraFlowBuilder/SKILL.md) | the Shira Flow Builder 0.0.7 VS Code extension: install, project and `keen.json`, the panel, the Problems checks, upload and auto-sync, the `.flow` canvas node by node, the flow and script debuggers |
 | `keen-administration` | [`Administration/SKILL.md`](Administration/SKILL.md) | the organisation console, segment by segment: rights, MFA, what MCP reaches, create / change / delete |
 | `keen-entanglement` | [`Entanglement/SKILL.md`](Entanglement/SKILL.md) | the partner site (Next.js + the Keen pre-process): setup, the public address, the pre-process, running and controlling it, Cloud Run later; `SDK/` — the chat SDK, its protocol and error codes |
 

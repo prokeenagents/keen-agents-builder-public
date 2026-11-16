@@ -55,12 +55,13 @@ There is no separate Error output. Failures go to **Fallback** (`error`) above.
 
 ## Settings
 
-Three panels on the canvas. Only the prompts' `content`, `agentName`, `sessionId` and `requestId` take `${…}`.
+Three panels on the canvas. Only the prompts' `content`, `agentName`, `sessionId` and `requestId` take `${…}` without a
+keen-validate error (the canvas form also accepts one in the Agent ID — see its row).
 
 | Panel · field | JSON key (`data.settings.…`) | Rule | What it is for |
 |---|---|---|---|
 | General · Agent Name | `agentName` | required, 4–60 chars, takes `${…}` | the agent's display name, used in logs |
-| General · Agent ID | `agentId` | required, kebab-case letters only, 4–60, **no `${…}`** (the canvas and keen-validate refuse it) | whose conversation this is. The node that answers the user must use the agent's ID **from the console**: the user's message is filed under that ID |
+| General · Agent ID | `agentId` | required; a literal ID of 3–100 characters, kebab-case letters only (the console's rule). The canvas form also accepts a `${dictionary.…}` / `${session.…}` placeholder (the engine resolves it), but keen-validate refuses one, so write the literal ID | whose conversation this is. The node that answers the user must use the agent's ID **from the console**: the user's message is filed under that ID |
 | General · Session ID / Request ID | `sessionId`, `requestId` | optional, ≤ 60, take `${…}`; write `""` | point this turn at another chat-history slot. If empty or it resolves to empty, the run's own ids are used |
 | General · Description | `data.description` | ≤ 250 | a note under the card |
 | LLM · Company / Model | `llm.company`, `llm.model`, `llm.modelId` | required, literal; pick from the table below | which provider and model are called. `modelId` is the model's id in the table: the engine ignores it, but the canvas uses it to choose which model to show |
@@ -68,13 +69,13 @@ Three panels on the canvas. Only the prompts' `content`, `agentName`, `sessionId
 | LLM · Interact with DB | `specialRules` `{ "type": "skip-internal-database-interactions" }` when **off** | on by default (rule absent) | off = no chat history is loaded or saved for this turn. Use for a stateless helper agent. It also never summarizes |
 | LLM · Use tools | `specialRules` `{ "type": "skip-internal-tooling" }` when **off** | on by default | off = a `<SYSTEM CALL>` is plain text and no tool runs |
 | Prompt · turns | `prompts[]` `{ id, role, content }` | ≤ 20 turns; turn 1 has `role: "system"`; others `user` / `assistant`; `content` non-empty, takes `${…}` | the system instructions and any few-shot turns |
-| (no canvas control) | `data.label` | ≤ 60 | not shown on the LLM card; the Prompt form's save keeps whatever is there |
+| (no canvas control) | `data.label` | ≤ 60 | not shown on the LLM card; no canvas form writes it, so it keeps whatever is there |
 | (no canvas control) | `agentResponse`, `agentResponseProperty` | `true` + a key name | also write a **text** answer to `dictionary.<key>`. The key is one flat top-level name (a dot is not a path). Not written for a tool call or an error answer; a write the dictionary cap refuses is skipped silently. Canvas saves keep it |
 
 **Providers and models.** The engine can call exactly `anthropic`, `openai` and `google`. Any other company is refused by
 keen-validate. A model name not in the engine's registry passes the validator but fails at run time (E6101). Write the
-`model` exactly, with its `modelId` (`name id`). `gpt-5.5` (1) and `claude-opus-4-7` (2) run in the engine but are not in
-the canvas's model list yet: a person who opens such a node on the canvas does not see its model.
+`model` exactly, with its `modelId` (`name id`). The canvas's model list is the same 24 models (in 0.0.7 it gained `gpt-5.5`
+and `claude-opus-4-7`), so a person who opens the node on the canvas sees its model.
 
 The engine sends every number you write in `temperature`, `top_p` and `maxTokens` as it is — it does not check them
 against the model's declared knobs or ranges — so write only the knobs the table lists for the model; the provider may
@@ -108,7 +109,7 @@ Do not write it.
 | `data.label` | no | ≤ 60; not shown on the LLM card and not read by the engine |
 | `data.description` | no | note (≤ 250). Not read by the engine |
 | `data.labelNode` / `data.descriptionNode` | `"LLM"` / `"Use LLM processor"` | fixed |
-| `data.open`, `data.openLLM`, `data.openPrompt` | `false` | which panel is open on the canvas. Not read by the engine |
+| `data.open`, `data.openLLM`, `data.openPrompt` | no — leave them out | the canvas no longer reads or writes them (every panel opens closed; ones already in a file are kept). Not read by the engine |
 | `data.handlePosition` | no (absent) | see Rotate. Not read by the engine |
 | `data.settings.agentId` / `agentName` | yes | see Settings; `agentName` takes `${…}` |
 | `data.settings.sessionId` / `requestId` | `""` | see Settings; take `${…}` |

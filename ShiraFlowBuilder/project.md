@@ -1,6 +1,6 @@
 # Creating and connecting a project in Shira
 
-> **Keen 15.3 · Shira Flow Builder 0.0.6.**
+> **Keen 15.3 · Shira Flow Builder 0.0.7.**
 
 The full project layout (what every file is for, the house standard for `services/`) is in
 `../ProjectStructure/SKILL.md`. This page is only what the **extension** creates, detects and reads.
@@ -21,18 +21,21 @@ project in a subfolder (`agent_project_dir`, e.g. `./agent` — `../ProjectSetup
 | empty (only `.git`, `.vscode`, `.DS_Store` count as empty) | `Empty folder — create a project below.` | **Create Project** on |
 | not empty, a marker missing | `This folder is not a Shira Flow Builder project.` | all off |
 | all markers, no errors | `Shira Flow Builder — detected` (green) | **Connect** on |
-| all markers, at least one error | `Shira Flow Builder — invalid` (red) + the error lines | **Connect** off |
+| all markers, at least one error | `Shira Flow Builder — invalid` (red) + the error lines | **Connect** off (**Disconnect** stays on while connected) |
 
 The errors and warnings are the extension's own checks (`problems.md`).
 
 ## 2. Create Project
 
 ### What it is
-The panel button **Create Project** writes a minimal skeleton into the open folder.
+The panel button **Create Project** writes a minimal skeleton into the open folder — **only the files that are
+missing**; it never overwrites one that exists.
 
 ### What the person does
 Opens an **empty** folder, clicks **Shira Flow Builder** in the activity bar, clicks **Create Project**. A toast says
-`Flow Builder project created.` and the status becomes `— detected`. (`Open a folder first, then create a project.`
+`Flow Builder project created.` and the status becomes `— detected`. When the folder already held a filled-in
+`.vscode/keen.json` (a folder with only `.vscode` counts as empty), the toast says
+`Flow Builder project created — your existing .vscode/keen.json was kept as it is.` (`Open a folder first, then create a project.`
 when no folder is open; `Could not create project: <reason>` on a disk error.)
 
 ### What it writes
@@ -40,7 +43,7 @@ when no folder is open; `Could not create project: <reason>` on a disk error.)
 | Path | Content |
 |---|---|
 | `.vscode/settings.json` | `{}` |
-| `.vscode/keen.json` | the five fields with placeholders (section 3) |
+| `.vscode/keen.json` | the five fields with placeholders (section 3) — only when there is none, or the existing one is empty / blank; a filled-in one is kept byte for byte |
 | `.gitignore` | a new file with the line `.vscode/keen.json`; if a `.gitignore` already exists the line is appended (left alone when `.vscode/keen.json` or `/.vscode/keen.json` is already there) |
 | `src/keen-tools.json` | `{ "tools": [] }` |
 | `src/flows/Project.flow` | `{ "nodes": [], "edges": [] }` — an empty canvas, no Start node yet |
@@ -48,7 +51,8 @@ when no folder is open; `Could not create project: <reason>` on a disk error.)
 | `src/scripts/tools/` | an empty folder |
 | `package.json` | `{ "name": "<folder name>", "version": "0.0.1", "private": true, "type": "module" }` |
 
-JSON files are written with 4-space indentation. `scripts/debux.js` is **not** created: the platform adds its own
+Every other file in the table is likewise written only when it does not exist (an existing `.vscode/settings.json` is
+kept too). JSON files are written with 4-space indentation. `scripts/debux.js` is **not** created: the platform adds its own
 debug probe at deploy time — never ship one.
 
 ### What you (the builder) can do yourself
@@ -60,7 +64,7 @@ panel will not offer **Connect**.
 
 | Mistake | What happens | Do instead |
 |---|---|---|
-| **Create Project** pressed in a folder that holds only `.vscode/keen.json` (filled in) | The folder counts as empty, the button is on, and Create Project **overwrites** `keen.json` with placeholders and `settings.json` with `{}` | Write the skeleton by hand when `keen.json` already exists, or fill `keen.json` after Create Project |
+| **Create Project** pressed on 0.0.6 in a folder that holds only `.vscode/keen.json` (filled in) | 0.0.6 **overwrites** `keen.json` with placeholders and `settings.json` with `{}` (0.0.7 keeps both and says so) | the person updates to 0.0.7, or you write the skeleton by hand |
 | Expecting `Project.flow` to be deployable as is | It has no nodes; add the Start node and the agent's flow first (`../Flow/Nodes/SKILL.md`) | — |
 | A `scripts/debux.js` added "for the debugger" | The deploy replaces it with its own; keen-validate warns | Leave it out |
 
@@ -141,7 +145,10 @@ The script rule accepts `MyScript` too; camelCase (`docStoreSearchTool`) is the 
   `<File>.flow — duplicate node ids regenerated`. Only on **create** — ids duplicated by editing a file are not fixed.
 - A save / create / delete / rename of a `.flow`, `.js` or `keen-tools.json` under `src/` flashes
   `File <name> was saved` (`created`, `deleted`, `renamed to <new>`) for about a second.
-- **While connected, every change under `src/` is deployed** (`upload.md`).
+- **While connected, every change to `src/flows/`, `src/scripts/` or `src/keen-tools.json` is deployed** — not while
+  the project has errors (`upload.md`).
+- A node id that is still used twice after that (a copy made outside VS Code, an edit, a repeat inside one file) is a
+  Problems error on both files (`problems.md`, rule 13).
 
 ### What you (the builder) can do yourself
 Write the files directly — same names, same content rules (`../ProjectStructure/SKILL.md`). When you copy a `.flow`,
