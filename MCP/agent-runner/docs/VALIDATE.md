@@ -56,7 +56,7 @@ Machine (`--json`, NDJSON — one object per finding, then a summary; key order 
 
 ```jsonc
 {"t":"error","file":"Bad.flow","where":"startNode_aaaaaaaaaaaa","msg":"Start label \"start\" must match …"}
-{"t":"error","file":"scripts/util.js (helper)","where":"","msg":"uses require() — scripts are ES modules; the deploy scanner rejects it as critical (ms-deploy scanner.ts:109-111); use `import`"}
+{"t":"error","file":"scripts/util.js (helper)","where":"","msg":"uses require() — scripts are ES modules; the platform's deploy refuses it as critical; use `import`"}
 {"t":"summary","errors":2,"warnings":0,"info":0,"flows":3,"scripts":15,"tools":11,"entries":["Project-Start","Worker-Start"],"ok":false}
 ```
 

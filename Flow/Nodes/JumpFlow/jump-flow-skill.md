@@ -47,11 +47,13 @@ Yes, one field:
 
 | Field | JSON key | Rule | What it is for |
 |---|---|---|---|
-| Flow | `data.settings.value` | required; a literal `File-Label` (`/^[A-Z][a-zA-Z]*-[A-Z][a-zA-Z]*$/`, ≤ 120 — the canvas form's cap); a placeholder: the canvas form accepts one, keen-validate refuses it | the entry to continue in: `<FlowFileName>-<StartLabel>`, e.g. `Refund-Start`; any file of the project, the jumping flow's own included |
+| Flow | `data.settings.value` | required; a literal `File-Label` (`/^[A-Z][a-zA-Z]*-[A-Z][a-zA-Z]*$/`, ≤ 120 — the canvas form's cap); a whole `${dictionary.…}` / `${session.…}` placeholder: the canvas form and keen-validate accept one | the entry to continue in: `<FlowFileName>-<StartLabel>`, e.g. `Refund-Start`; any file of the project, the jumping flow's own included |
 
 The engine resolves `${dictionary.…}` / `${session.…}` in this field, and the canvas form accepts one (a whole
 placeholder, or placeholders mixed with letters and `-`; a half wrapper such as `${flow}` or `${dictionary.next`
-stays refused). keen-validate still refuses anything that is not a literal `File-Label`. Write a literal; to choose at run time, put a **Condition** in front of two Jump Flows.
+stays refused). keen-validate accepts the same placeholder (letters and `-` around it, ≤ 120 in all) and refuses a half
+wrapper; a placeholder target is not checked against the project's File-Labels, because it resolves at run time — so a
+literal is still the safer choice when the target is known.
 
 `data.description` is an optional note (≤ 250, the canvas form's cap). `data.label` is not a setting: the
 canvas writes it as `""` and the card shows the target instead.

@@ -43,15 +43,16 @@ failing branch does to the others and to the run is in the Parallel Flows file (
 
 | Field (canvas) | JSON key | Rule | What it is for |
 |---|---|---|---|
-| Flow | `data.settings.value` | **required**; a `File-Label`: `/^[A-Z][a-zA-Z]*-[A-Z][a-zA-Z]*$/` (letters only, one dash); ≤ 120 (the canvas input box takes exactly that); a placeholder: the canvas form accepts one, keen-validate refuses it | the entry the branch starts at: `<FlowFileName>-<StartLabel>`, in any flow file of the project. The only property the engine reads |
+| Flow | `data.settings.value` | **required**; a `File-Label`: `/^[A-Z][a-zA-Z]*-[A-Z][a-zA-Z]*$/` (letters only, one dash); ≤ 120 (the canvas input box takes exactly that); a whole `${dictionary.…}` / `${session.…}` placeholder: the canvas form and keen-validate accept one | the entry the branch starts at: `<FlowFileName>-<StartLabel>`, in any flow file of the project. The only property the engine reads |
 | (Flow, copy) | `data.settings.label` | same text as `value` | the canvas writes it; not read by the engine or deploy |
 | (Flow, copy) | `data.label` | same text as `value` | the card's title; not read |
 | Description | `data.description` | optional, ≤ 250 | a note under the card; not read |
 
 The engine would resolve a `${dictionary.…}` / `${session.…}` placeholder in `value` (against the caller's
 dictionary and session), and the canvas form accepts one (a whole placeholder, or placeholders mixed with letters and `-`; a half wrapper
-such as `${flow}` or `${dictionary.next` stays refused). keen-validate still refuses anything but a literal `File-Label`.
-Write a literal entry name.
+such as `${flow}` or `${dictionary.next` stays refused). keen-validate accepts the same placeholder (letters and `-`
+around it, ≤ 120 in all) and refuses a half wrapper; a placeholder is not checked against the project's File-Labels. A
+literal entry name is still the safer choice.
 
 ## Rotate
 

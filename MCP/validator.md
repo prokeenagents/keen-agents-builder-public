@@ -52,7 +52,7 @@ broken fixture:
 ✗ ERROR  scripts/bad.js (helper)
            import 'node:crypto' — only 'system/*' and relative './' '../' files are allowed (no npm packages, no absolute paths)
 ✗ ERROR  scripts/bad.js (helper)
-           references `eval` — forbidden in the sandbox; the deploy scanner rejects it as critical ("Reference to eval is forbidden", ms-deploy scanner.ts:44/272-299)
+           references `eval` — forbidden in the sandbox; the platform's deploy refuses it as critical ("Reference to eval is forbidden")
 ⚠ WARN   Assistant.flow › agentNode_d1QRdKj9fOK3
            agentNode "error" (Fallback) edge is not wired — on a provider failure the flow continues on next_1 with the error text AS the answer (wire it to handle failures explicitly)
 
@@ -124,9 +124,10 @@ token and the console password); `user` must look like an e-mail, `password` non
   (the engine throws "Member access is not allowed").
 - Loop `value` / `setto` need the `dictionary.` / `session.` prefix and must differ [canvas].
 - Assignment / Script key-value caps: ≤ 10 pairs, key ≤ 100, value ≤ 200, no duplicate keys [canvas]; Script path ends `.js`.
-- Run / Jump / Flow Pointer targets are a `File-Label` `^[A-Z][a-zA-Z]*-[A-Z][a-zA-Z]*$` (no digits, no `${…}`)
-  [canvas]; Parallel Context `contextCollection` starts with `dictionary.`, `pipe` is a `File-Label`.
-- LLM node: `agentId` kebab-case letters only, no `${…}` [canvas]; `agentName` present; `settings.llm` with
+- Run / Jump / Flow Pointer targets are a `File-Label` `^[A-Z][a-zA-Z]*-[A-Z][a-zA-Z]*$` (no digits) or a whole
+  `${dictionary.<path>}` / `${session.<key>}` placeholder (letters and `-` around it, ≤ 120; a half wrapper refused) [canvas]; Parallel Context `contextCollection` starts with `dictionary.`, `pipe` is a `File-Label`.
+- LLM node: `agentId` 3–100 characters, kebab-case letters only, or a whole `${dictionary.…}` / `${session.…}` placeholder
+  (lowercase letters and `-` around it, ≤ 100) [canvas]; `agentName` present; `settings.llm` with
   `company` ∈ anthropic / openai / google and a `model` (else E6101 at run time); Note ≤ 160.
 - A placeholder root other than `dictionary` / `session` is warned: it stays literal text.
 
